@@ -130,14 +130,21 @@ export function TournamentDashboard({
               </p>
             </div>
             <Button
-              onClick={onReset}
+              onClick={handleResetTournament}
+              disabled={isResetting}
               variant="outline"
               className="gap-2 flex-shrink-0"
               size="sm"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span className="hidden sm:inline">Nuevo Torneo</span>
-              <span className="sm:hidden">Nuevo</span>
+              {isResetting ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                <RotateCcw className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">
+                {isResetting ? "Reiniciando..." : "Nuevo Torneo"}
+              </span>
+              <span className="sm:hidden">{isResetting ? "..." : "Nuevo"}</span>
             </Button>
           </div>
 
