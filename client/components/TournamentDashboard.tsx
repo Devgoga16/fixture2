@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Bracket, Match, Team, generateBracket, updateMatchResult } from "@/lib/tournament";
+import {
+  Bracket,
+  Match,
+  Team,
+  generateBracket,
+  updateMatchResult,
+} from "@/lib/tournament";
 import { BracketDisplay } from "./BracketDisplay";
 import { MatchResultDialog } from "./MatchResultDialog";
 import { Button } from "@/components/ui/button";
@@ -30,14 +36,21 @@ export function TournamentDashboard({
 
   const handleSaveResult = (score1: number, score2: number) => {
     if (selectedMatch) {
-      const newBracket = updateMatchResult(bracket, selectedMatch.id, score1, score2);
+      const newBracket = updateMatchResult(
+        bracket,
+        selectedMatch.id,
+        score1,
+        score2,
+      );
       setBracket(newBracket);
       setSelectedMatch(null);
     }
   };
 
   // Calculate tournament statistics
-  const completedMatches = bracket.rounds.flat().filter(m => m.completed).length;
+  const completedMatches = bracket.rounds
+    .flat()
+    .filter((m) => m.completed).length;
   const totalMatches = bracket.rounds.flat().length;
   const finalMatch = bracket.rounds[bracket.rounds.length - 1]?.[0];
   const champion = finalMatch?.completed ? finalMatch.winner : null;
@@ -72,11 +85,17 @@ export function TournamentDashboard({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-blue-50 to-blue-100">
               <p className="text-xs md:text-sm text-gray-600 mb-1">Equipos</p>
-              <p className="text-2xl md:text-3xl font-bold text-blue-600">{teamSize}</p>
+              <p className="text-2xl md:text-3xl font-bold text-blue-600">
+                {teamSize}
+              </p>
             </Card>
             <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-purple-50 to-purple-100">
-              <p className="text-xs md:text-sm text-gray-600 mb-1 line-clamp-2">Partidos</p>
-              <p className="text-2xl md:text-3xl font-bold text-purple-600">{completedMatches}/{totalMatches}</p>
+              <p className="text-xs md:text-sm text-gray-600 mb-1 line-clamp-2">
+                Partidos
+              </p>
+              <p className="text-2xl md:text-3xl font-bold text-purple-600">
+                {completedMatches}/{totalMatches}
+              </p>
             </Card>
             <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-emerald-50 to-emerald-100">
               <p className="text-xs md:text-sm text-gray-600 mb-1">Progreso</p>
@@ -98,8 +117,12 @@ export function TournamentDashboard({
               <div className="flex items-center gap-4">
                 <Trophy className="w-8 h-8 text-amber-900 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-amber-900 uppercase">🎉 ¡Torneo Completado!</p>
-                  <p className="text-3xl font-bold text-amber-900">{champion.name}</p>
+                  <p className="text-sm font-semibold text-amber-900 uppercase">
+                    🎉 ¡Torneo Completado!
+                  </p>
+                  <p className="text-3xl font-bold text-amber-900">
+                    {champion.name}
+                  </p>
                 </div>
               </div>
             </div>
@@ -144,23 +167,41 @@ export function TournamentDashboard({
 
           {/* Instructions */}
           <Card className="border-0 shadow-lg p-6 bg-white">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Instrucciones</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Instrucciones
+            </h3>
             <div className="space-y-4 text-gray-700">
               <div>
-                <p className="font-semibold text-blue-600 mb-1">1. Revisa el Fixture</p>
-                <p className="text-sm">Todos los partidos están organizados en rondas.</p>
+                <p className="font-semibold text-blue-600 mb-1">
+                  1. Revisa el Fixture
+                </p>
+                <p className="text-sm">
+                  Todos los partidos están organizados en rondas.
+                </p>
               </div>
               <div>
-                <p className="font-semibold text-blue-600 mb-1">2. Ingresa Resultados</p>
-                <p className="text-sm">Haz clic en un partido para agregar los puntajes.</p>
+                <p className="font-semibold text-blue-600 mb-1">
+                  2. Ingresa Resultados
+                </p>
+                <p className="text-sm">
+                  Haz clic en un partido para agregar los puntajes.
+                </p>
               </div>
               <div>
-                <p className="font-semibold text-blue-600 mb-1">3. Avanza Ganadores</p>
-                <p className="text-sm">El ganador avanza automáticamente a la siguiente ronda.</p>
+                <p className="font-semibold text-blue-600 mb-1">
+                  3. Avanza Ganadores
+                </p>
+                <p className="text-sm">
+                  El ganador avanza automáticamente a la siguiente ronda.
+                </p>
               </div>
               <div>
-                <p className="font-semibold text-blue-600 mb-1">4. ¡Decide el Campeón!</p>
-                <p className="text-sm">Cuando se complete la final, tendrás un campeón.</p>
+                <p className="font-semibold text-blue-600 mb-1">
+                  4. ¡Decide el Campeón!
+                </p>
+                <p className="text-sm">
+                  Cuando se complete la final, tendrás un campeón.
+                </p>
               </div>
             </div>
           </Card>

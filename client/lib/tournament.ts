@@ -106,7 +106,12 @@ export function generateBracket(teams: Team[]): Bracket {
         round: 0,
         position: matchPosition,
         team1: null, // Will be filled with prelim winner i
-        team2: i + 1 < preliminary.preliminaryMatches ? null : (preliminary.byes > 0 ? teams[preliminary.preliminaryMatches * 2] : null), // prelim winner i+1 or bye team
+        team2:
+          i + 1 < preliminary.preliminaryMatches
+            ? null
+            : preliminary.byes > 0
+              ? teams[preliminary.preliminaryMatches * 2]
+              : null, // prelim winner i+1 or bye team
         score1: null,
         score2: null,
         winner: null,
@@ -209,7 +214,7 @@ export function updateMatchResult(
   // Propagate winner to next round
   if (roundIndex + 1 < newBracket.rounds.length && winner) {
     const nextRound = newBracket.rounds[roundIndex + 1];
-    
+
     // Special handling for preliminary round (round -1) → first main round (round 0)
     if (roundIndex === 0 && newBracket.rounds[0][0]?.round === -1) {
       // This is preliminary round

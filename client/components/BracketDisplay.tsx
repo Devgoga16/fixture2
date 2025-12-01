@@ -85,7 +85,9 @@ function MatchCard({ match, onClick }: MatchCardProps) {
           {match.team1 ? (
             <>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{match.team1.name}</p>
+                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">
+                  {match.team1.name}
+                </p>
               </div>
               {isComplete && (
                 <span
@@ -100,7 +102,9 @@ function MatchCard({ match, onClick }: MatchCardProps) {
               )}
             </>
           ) : (
-            <span className="text-gray-400 italic text-xs md:text-sm">Por definir</span>
+            <span className="text-gray-400 italic text-xs md:text-sm">
+              Por definir
+            </span>
           )}
         </div>
 
@@ -109,7 +113,9 @@ function MatchCard({ match, onClick }: MatchCardProps) {
           {match.team2 ? (
             <>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{match.team2.name}</p>
+                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">
+                  {match.team2.name}
+                </p>
               </div>
               {isComplete && (
                 <span
@@ -124,7 +130,9 @@ function MatchCard({ match, onClick }: MatchCardProps) {
               )}
             </>
           ) : (
-            <span className="text-gray-400 italic text-xs md:text-sm">Por definir</span>
+            <span className="text-gray-400 italic text-xs md:text-sm">
+              Por definir
+            </span>
           )}
         </div>
 
@@ -132,7 +140,9 @@ function MatchCard({ match, onClick }: MatchCardProps) {
         {!isComplete && match.team1 && match.team2 && (
           <div className="flex items-center justify-center mt-2 md:mt-3 pt-2 md:pt-3 border-t text-xs font-medium text-blue-600 gap-1">
             <ChevronRight className="w-3 h-3" />
-            <span className="hidden md:inline">Haz clic para ingresar resultado</span>
+            <span className="hidden md:inline">
+              Haz clic para ingresar resultado
+            </span>
             <span className="md:hidden">Haz clic</span>
           </div>
         )}

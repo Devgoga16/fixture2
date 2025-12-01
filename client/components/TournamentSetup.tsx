@@ -45,12 +45,10 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
   };
 
   const removeTeam = (id: string) => {
-    const updatedTeams = teams.filter(t => t.id !== id);
+    const updatedTeams = teams.filter((t) => t.id !== id);
     setTeams(updatedTeams);
 
-    const updatedText = updatedTeams
-      .map(t => t.name)
-      .join("\n");
+    const updatedText = updatedTeams.map((t) => t.name).join("\n");
     setTeamInputText(updatedText);
   };
 
@@ -69,12 +67,16 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Gestor de Torneo
           </h1>
-          <p className="text-gray-600 text-lg">Configura tu torneo de eliminación directa</p>
+          <p className="text-gray-600 text-lg">
+            Configura tu torneo de eliminación directa
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           <Card className="p-8 border-0 shadow-lg bg-white">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">1. Cantidad de Equipos</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              1. Cantidad de Equipos
+            </h2>
 
             <div className="space-y-4">
               <div>
@@ -92,7 +94,9 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
               </div>
 
               <div className="pt-4">
-                <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">Atajos rápidos</p>
+                <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">
+                  Atajos rápidos
+                </p>
                 <div className="grid grid-cols-2 gap-2">
                   {[4, 8, 16, 32].map((size) => (
                     <button
@@ -113,21 +117,37 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
               {preliminary.preliminaryMatches > 0 && (
                 <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded mt-4">
                   <p className="text-sm text-amber-800">
-                    <span className="font-bold">Fase Previa:</span> Se necesitarán <span className="font-bold">{preliminary.preliminaryMatches}</span> partido{preliminary.preliminaryMatches !== 1 ? "s" : ""} en la fase previa. {preliminary.byes > 0 ? `${preliminary.byes} equipo${preliminary.byes !== 1 ? "s" : ""} descansará${preliminary.byes !== 1 ? "n" : ""} en esa ronda.` : ""}
+                    <span className="font-bold">Fase Previa:</span> Se
+                    necesitarán{" "}
+                    <span className="font-bold">
+                      {preliminary.preliminaryMatches}
+                    </span>{" "}
+                    partido{preliminary.preliminaryMatches !== 1 ? "s" : ""} en
+                    la fase previa.{" "}
+                    {preliminary.byes > 0
+                      ? `${preliminary.byes} equipo${preliminary.byes !== 1 ? "s" : ""} descansará${preliminary.byes !== 1 ? "n" : ""} en esa ronda.`
+                      : ""}
                   </p>
                 </div>
               )}
 
               <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
                 <p className="text-sm text-blue-800">
-                  <span className="font-bold">Estructura:</span> {teamCount} equipos{preliminary.preliminaryMatches > 0 ? ` → ${preliminary.preliminaryMatches} fase${preliminary.preliminaryMatches !== 1 ? "s" : ""} previa → ` : " → "}Bracket de {teamCount - preliminary.preliminaryMatches * 2}
+                  <span className="font-bold">Estructura:</span> {teamCount}{" "}
+                  equipos
+                  {preliminary.preliminaryMatches > 0
+                    ? ` → ${preliminary.preliminaryMatches} fase${preliminary.preliminaryMatches !== 1 ? "s" : ""} previa → `
+                    : " → "}
+                  Bracket de {teamCount - preliminary.preliminaryMatches * 2}
                 </p>
               </div>
             </div>
           </Card>
 
           <Card className="p-8 border-0 shadow-lg bg-white flex flex-col">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">2. Equipos ({teams.length}/{teamCount})</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              2. Equipos ({teams.length}/{teamCount})
+            </h2>
 
             <div className="space-y-4 flex-1 flex flex-col">
               <div className="flex-1 flex flex-col">
@@ -147,7 +167,9 @@ Equipo 3
 
               {teams.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">Equipos agregados</p>
+                  <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">
+                    Equipos agregados
+                  </p>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {teams.map((team, idx) => (
                       <div
@@ -184,7 +206,9 @@ Equipo 3
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            {canStart ? "Iniciar Torneo" : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
+            {canStart
+              ? "Iniciar Torneo"
+              : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
           </Button>
         </div>
       </div>
