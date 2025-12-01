@@ -79,7 +79,7 @@ function MatchCard({ match, onClick }: MatchCardProps) {
             : "border-gray-200 bg-gray-50"
       }`}
     >
-      <div className="p-4 min-w-64">
+      <div className="p-3 md:p-4 min-w-52 md:min-w-64">
         {/* Team 1 */}
         <div className="flex items-center gap-3 mb-3 pb-3 border-b">
           {match.team1 ? (
