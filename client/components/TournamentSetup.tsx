@@ -134,48 +134,49 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
           </Card>
 
           {/* Teams Input */}
-          <Card className="p-8 border-0 shadow-lg bg-white">
+          <Card className="p-8 border-0 shadow-lg bg-white flex flex-col">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">2. Equipos ({teams.length}/{teamCount})</h2>
-            
-            <div className="space-y-4 mb-6">
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder="Nombre del equipo"
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && addTeam()}
-                  disabled={teams.length >= teamCount}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={addTeam}
-                  disabled={teams.length >= teamCount || !teamName.trim()}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {teams.map((team, idx) => (
-                <div
-                  key={team.id}
-                  className="flex items-center justify-between bg-gray-50 p-3 rounded-lg group hover:bg-gray-100 transition"
-                >
-                  <span className="font-medium text-gray-800">
-                    <span className="text-gray-500 mr-3">#{idx + 1}</span>
-                    {team.name}
-                  </span>
-                  <button
-                    onClick={() => removeTeam(team.id)}
-                    className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+            <div className="space-y-4 flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col">
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">
+                  Ingresa los nombres de los equipos (uno por línea)
+                </label>
+                <textarea
+                  placeholder={`Equipo 1
+Equipo 2
+Equipo 3
+...`}
+                  value={teamInputText}
+                  onChange={(e) => handleTeamInputChange(e.target.value)}
+                  className="flex-1 p-4 border-2 border-gray-200 rounded-lg font-medium text-gray-800 resize-none focus:border-blue-500 focus:outline-none placeholder-gray-400"
+                />
+              </div>
+
+              {teams.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">Equipos agregados</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {teams.map((team, idx) => (
+                      <div
+                        key={team.id}
+                        className="flex items-center justify-between bg-gray-50 p-3 rounded-lg group hover:bg-gray-100 transition"
+                      >
+                        <span className="font-medium text-gray-800">
+                          <span className="text-gray-500 mr-3">#{idx + 1}</span>
+                          {team.name}
+                        </span>
+                        <button
+                          onClick={() => removeTeam(team.id)}
+                          className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </Card>
         </div>
