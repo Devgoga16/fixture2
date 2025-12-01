@@ -12,7 +12,6 @@ export default function Index() {
     bracket: Bracket;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleTournamentStart = async (
     teams: Team[],
