@@ -8,6 +8,9 @@ import {
   UpdateMatchRequest,
 } from "@shared/api";
 
+// Re-export types for convenience
+export type { TournamentData, CreateTournamentRequest, UpdateMatchRequest };
+
 /**
  * Create a new tournament
  */
