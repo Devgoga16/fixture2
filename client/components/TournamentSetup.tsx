@@ -13,8 +13,6 @@ interface TournamentSetupProps {
     size: number,
     tournamentData: TournamentData,
   ) => void;
-  isLoading?: boolean;
-  setIsLoading?: (loading: boolean) => void;
 }
 
 export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
