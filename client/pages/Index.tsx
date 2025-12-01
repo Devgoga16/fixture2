@@ -36,13 +36,7 @@ export default function Index() {
   };
 
   if (!tournament) {
-    return (
-      <TournamentSetup
-        onTournamentStart={handleTournamentStart}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-      />
-    );
+    return <TournamentSetup onTournamentStart={handleTournamentStart} />;
   }
 
   return (
