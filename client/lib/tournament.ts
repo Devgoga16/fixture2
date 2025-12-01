@@ -94,24 +94,44 @@ export function generateBracket(teams: Team[]): Bracket {
     rounds.push(prelimRound);
 
     // Build the first round of the main bracket
-    // It will contain preliminary winners (as null slots) and bye teams
+    // It will contain preliminary winners, bye teams, and non-preliminary teams
+    const mainBracketSize = largestPowerOf2LessThanOrEqual(teamCount);
     const firstRoundMatches: Match[] = [];
     let matchPosition = 0;
+    let prelimWinnerIndex = 0;
+    let nonPrelimTeamIndex = preliminary.preliminaryMatches * 2;
 
-    // Create slots for preliminary winners
-    // Each pair of preliminary matches feeds into one first-round match
-    for (let i = 0; i < preliminary.preliminaryMatches; i += 2) {
+    // Create matches for the first round of the main bracket
+    for (let i = 0; i < mainBracketSize / 2; i++) {
+      let team1: Team | null = null;
+      let team2: Team | null = null;
+
+      // Add preliminary winners
+      if (prelimWinnerIndex < preliminary.preliminaryMatches) {
+        team1 = null; // Will be filled with prelim winner
+        prelimWinnerIndex++;
+      } else if (nonPrelimTeamIndex < teamCount) {
+        // Add non-preliminary teams
+        team1 = teams[nonPrelimTeamIndex];
+        nonPrelimTeamIndex++;
+      }
+
+      // Add second team (either another prelim winner or non-prelim team)
+      if (prelimWinnerIndex < preliminary.preliminaryMatches) {
+        team2 = null; // Will be filled with prelim winner
+        prelimWinnerIndex++;
+      } else if (nonPrelimTeamIndex < teamCount) {
+        // Add non-preliminary teams
+        team2 = teams[nonPrelimTeamIndex];
+        nonPrelimTeamIndex++;
+      }
+
       firstRoundMatches.push({
         id: `match-0-${matchPosition}`,
         round: 0,
         position: matchPosition,
-        team1: null, // Will be filled with prelim winner i
-        team2:
-          i + 1 < preliminary.preliminaryMatches
-            ? null
-            : preliminary.byes > 0
-              ? teams[preliminary.preliminaryMatches * 2]
-              : null, // prelim winner i+1 or bye team
+        team1,
+        team2,
         score1: null,
         score2: null,
         winner: null,
