@@ -11,7 +11,6 @@ export default function Index() {
     id: string;
     bracket: Bracket;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleTournamentStart = async (
     teams: Team[],
