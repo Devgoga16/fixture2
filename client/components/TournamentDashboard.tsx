@@ -108,11 +108,11 @@ export function TournamentDashboard({
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
         <Card className="border-0 shadow-lg bg-white overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <Trophy className="w-6 h-6 text-amber-500" />
+          <div className="p-4 md:p-6 border-b border-gray-200">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+              <Trophy className="w-5 md:w-6 h-5 md:h-6 text-amber-500" />
               Fixture del Torneo
             </h2>
           </div>
