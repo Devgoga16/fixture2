@@ -64,7 +64,6 @@ export function generateBracket(teams: Team[]): Bracket {
   const preliminary = calculatePreliminaryRound(teamCount);
 
   // Generate preliminary round if needed
-  let roundTeams = teams;
   if (preliminary.preliminaryMatches > 0) {
     const prelimRound: Match[] = [];
     for (let i = 0; i < preliminary.preliminaryMatches; i++) {
@@ -82,35 +81,99 @@ export function generateBracket(teams: Team[]): Bracket {
     }
     rounds.push(prelimRound);
 
-    // Teams that advance from preliminary + byes
-    roundTeams = [];
-    for (let i = 0; i < preliminary.byes; i++) {
-      roundTeams.push(teams[preliminary.preliminaryMatches * 2 + i]);
-    }
-  }
+    // Build the first round of main bracket with slots for preliminary winners + bye teams
+    // Preliminary winners go first, then bye teams
+    const firstRoundMatches: Match[] = [];
+    let matchPosition = 0;
 
-  // Generate main bracket rounds
-  let currentRoundTeams = roundTeams;
-  let roundNum = 0;
-
-  while (currentRoundTeams.length > 1) {
-    const round: Match[] = [];
-    for (let i = 0; i < currentRoundTeams.length; i += 2) {
-      round.push({
-        id: `match-${roundNum}-${i / 2}`,
-        round: roundNum,
-        position: Math.floor(i / 2),
-        team1: currentRoundTeams[i],
-        team2: currentRoundTeams[i + 1],
+    // Create matches for preliminary winners to advance to
+    for (let i = 0; i < preliminary.preliminaryMatches; i++) {
+      // These matches will be filled with winners from preliminary
+      firstRoundMatches.push({
+        id: `match-0-${matchPosition}`,
+        round: 0,
+        position: matchPosition,
+        team1: null, // Will be filled from prelim winners
+        team2: null,
         score1: null,
         score2: null,
         winner: null,
         completed: false,
       });
+      matchPosition++;
     }
-    rounds.push(round);
-    currentRoundTeams = Array(round.length).fill(null);
-    roundNum++;
+
+    // Add bye teams as partners in matches with preliminary winners
+    for (let i = 0; i < preliminary.byes; i++) {
+      const byeTeam = teams[preliminary.preliminaryMatches * 2 + i];
+      if (firstRoundMatches[i]) {
+        firstRoundMatches[i].team2 = byeTeam;
+      } else {
+        // If more byes than prelim matches, create new matches
+        firstRoundMatches.push({
+          id: `match-0-${matchPosition}`,
+          round: 0,
+          position: matchPosition,
+          team1: null,
+          team2: byeTeam,
+          score1: null,
+          score2: null,
+          winner: null,
+          completed: false,
+        });
+        matchPosition++;
+      }
+    }
+
+    rounds.push(firstRoundMatches);
+
+    // Generate remaining bracket rounds
+    let currentRoundTeams = Array(firstRoundMatches.length).fill(null);
+    let roundNum = 1;
+
+    while (currentRoundTeams.length > 1) {
+      const round: Match[] = [];
+      for (let i = 0; i < currentRoundTeams.length; i += 2) {
+        round.push({
+          id: `match-${roundNum}-${i / 2}`,
+          round: roundNum,
+          position: Math.floor(i / 2),
+          team1: currentRoundTeams[i],
+          team2: currentRoundTeams[i + 1],
+          score1: null,
+          score2: null,
+          winner: null,
+          completed: false,
+        });
+      }
+      rounds.push(round);
+      currentRoundTeams = Array(round.length).fill(null);
+      roundNum++;
+    }
+  } else {
+    // No preliminary round - just generate the standard bracket
+    let currentRoundTeams = teams;
+    let roundNum = 0;
+
+    while (currentRoundTeams.length > 1) {
+      const round: Match[] = [];
+      for (let i = 0; i < currentRoundTeams.length; i += 2) {
+        round.push({
+          id: `match-${roundNum}-${i / 2}`,
+          round: roundNum,
+          position: Math.floor(i / 2),
+          team1: currentRoundTeams[i],
+          team2: currentRoundTeams[i + 1],
+          score1: null,
+          score2: null,
+          winner: null,
+          completed: false,
+        });
+      }
+      rounds.push(round);
+      currentRoundTeams = Array(round.length).fill(null);
+      roundNum++;
+    }
   }
 
   return { rounds, totalTeams: teamCount };
