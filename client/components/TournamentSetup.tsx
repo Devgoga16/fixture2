@@ -22,6 +22,7 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamInputText, setTeamInputText] = useState("");
   const [teamCountInput, setTeamCountInput] = useState<string>("8");
+  const [isLoading, setIsLoading] = useState(false);
 
   const preliminary = calculatePreliminaryRound(teamCount);
 
