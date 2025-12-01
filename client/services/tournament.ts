@@ -44,11 +44,11 @@ export async function updateMatchResult(
   tournamentId: string,
   matchId: string,
   data: UpdateMatchRequest,
-): Promise<{
-  bracket: Bracket;
-  match: Match;
-}> {
-  return apiCall(`/tournaments/${tournamentId}/matches/${matchId}`, {
+) {
+  return apiCall<{
+    bracket: Bracket;
+    match: Match;
+  }>(`/tournaments/${tournamentId}/matches/${matchId}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
