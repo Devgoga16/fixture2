@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bracket, Match, Team, TeamSize, generateBracket, updateMatchResult } from "@/lib/tournament";
+import { Bracket, Match, Team, generateBracket, updateMatchResult } from "@/lib/tournament";
 import { BracketDisplay } from "./BracketDisplay";
 import { MatchResultDialog } from "./MatchResultDialog";
 import { Button } from "@/components/ui/button";
