@@ -60,9 +60,6 @@ export function calculatePreliminaryRound(teamCount: number): {
  */
 export function generateBracket(teams: Team[]): Bracket {
   const teamCount = teams.length;
-  const validSizes: TeamSize[] = [4, 8, 16, 32];
-  const bracketSize = validSizes.find(size => size >= teamCount) || 32;
-
   const rounds: Match[][] = [];
   const preliminary = calculatePreliminaryRound(teamCount);
 
@@ -111,7 +108,7 @@ export function generateBracket(teams: Team[]): Bracket {
         completed: false,
       });
     }
-    rounds.push(preliminary.preliminaryMatches > 0 ? round : round);
+    rounds.push(round);
     currentRoundTeams = Array(round.length).fill(null);
     roundNum++;
   }
