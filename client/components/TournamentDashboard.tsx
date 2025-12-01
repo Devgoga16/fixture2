@@ -8,7 +8,7 @@ import { RotateCcw, Trophy, Users } from "lucide-react";
 
 interface TournamentDashboardProps {
   teams: Team[];
-  teamSize: TeamSize;
+  teamSize: number;
   onReset: () => void;
 }
 
