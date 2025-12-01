@@ -1,26 +1,12 @@
 import { apiCall } from "@/config/api";
-import { Team, Bracket, Match } from "@/lib/tournament";
-
-export interface TournamentData {
-  id: string;
-  name: string;
-  status: "draft" | "in_progress" | "completed";
-  total_teams: number;
-  teams: Team[];
-  bracket: Bracket;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateTournamentRequest {
-  name: string;
-  teams: Array<{ name: string }>;
-}
-
-export interface UpdateMatchRequest {
-  score1: number;
-  score2: number;
-}
+import {
+  Team,
+  Bracket,
+  Match,
+  TournamentData,
+  CreateTournamentRequest,
+  UpdateMatchRequest,
+} from "@shared/api";
 
 /**
  * Create a new tournament
