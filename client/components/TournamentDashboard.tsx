@@ -69,25 +69,25 @@ export function TournamentDashboard({
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="p-4 border-0 bg-gradient-to-br from-blue-50 to-blue-100">
-              <p className="text-sm text-gray-600 mb-1">Equipos</p>
-              <p className="text-3xl font-bold text-blue-600">{teamSize}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+            <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-blue-50 to-blue-100">
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Equipos</p>
+              <p className="text-2xl md:text-3xl font-bold text-blue-600">{teamSize}</p>
             </Card>
-            <Card className="p-4 border-0 bg-gradient-to-br from-purple-50 to-purple-100">
-              <p className="text-sm text-gray-600 mb-1">Partidos Completados</p>
-              <p className="text-3xl font-bold text-purple-600">{completedMatches}/{totalMatches}</p>
+            <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-purple-50 to-purple-100">
+              <p className="text-xs md:text-sm text-gray-600 mb-1 line-clamp-2">Partidos</p>
+              <p className="text-2xl md:text-3xl font-bold text-purple-600">{completedMatches}/{totalMatches}</p>
             </Card>
-            <Card className="p-4 border-0 bg-gradient-to-br from-emerald-50 to-emerald-100">
-              <p className="text-sm text-gray-600 mb-1">Progreso</p>
-              <p className="text-3xl font-bold text-emerald-600">
+            <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-emerald-50 to-emerald-100">
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Progreso</p>
+              <p className="text-2xl md:text-3xl font-bold text-emerald-600">
                 {Math.round((completedMatches / totalMatches) * 100)}%
               </p>
             </Card>
-            <Card className="p-4 border-0 bg-gradient-to-br from-amber-50 to-amber-100">
-              <p className="text-sm text-gray-600 mb-1">Fase</p>
-              <p className="text-3xl font-bold text-amber-600">
-                {!champion ? `${bracket.rounds.length}/${bracket.rounds.length}` : "✓"}
+            <Card className="p-3 md:p-4 border-0 bg-gradient-to-br from-amber-50 to-amber-100">
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Fase</p>
+              <p className="text-2xl md:text-3xl font-bold text-amber-600">
+                {!champion ? `${bracket.rounds.length}` : "✓"}
               </p>
             </Card>
           </div>
