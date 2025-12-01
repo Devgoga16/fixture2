@@ -64,6 +64,7 @@ export function generateBracket(teams: Team[]): Bracket {
   const preliminary = calculatePreliminaryRound(teamCount);
 
   // Generate preliminary round if needed
+  let firstRoundTeamsCount = teamCount;
   if (preliminary.preliminaryMatches > 0) {
     const prelimRound: Match[] = [];
     for (let i = 0; i < preliminary.preliminaryMatches; i++) {
@@ -81,47 +82,38 @@ export function generateBracket(teams: Team[]): Bracket {
     }
     rounds.push(prelimRound);
 
-    // Build the first round of main bracket with slots for preliminary winners + bye teams
-    // Preliminary winners go first, then bye teams
-    const firstRoundMatches: Match[] = [];
-    let matchPosition = 0;
+    // First round will have preliminary winners + bye teams
+    // Number of teams in first main round = preliminary winners + byes
+    firstRoundTeamsCount = preliminary.preliminaryMatches + preliminary.byes;
 
-    // Create matches for preliminary winners to advance to
-    for (let i = 0; i < preliminary.preliminaryMatches; i++) {
-      // These matches will be filled with winners from preliminary
+    // Build first round with placeholder structure
+    // Preliminary winners will be in team1 positions (filled as matches are completed)
+    // Bye teams will be in team2 positions
+    const firstRoundMatches: Match[] = [];
+
+    // Create matches pairing preliminary winners
+    for (let i = 0; i < preliminary.preliminaryMatches; i += 2) {
+      const position = Math.floor(i / 2);
       firstRoundMatches.push({
-        id: `match-0-${matchPosition}`,
+        id: `match-0-${position}`,
         round: 0,
-        position: matchPosition,
-        team1: null, // Will be filled from prelim winners
-        team2: null,
+        position: position,
+        team1: null, // Will be filled with prelim winner i
+        team2: i + 1 < preliminary.preliminaryMatches ? null : null, // Will be filled with prelim winner i+1 or bye team
         score1: null,
         score2: null,
         winner: null,
         completed: false,
       });
-      matchPosition++;
     }
 
-    // Add bye teams as partners in matches with preliminary winners
-    for (let i = 0; i < preliminary.byes; i++) {
-      const byeTeam = teams[preliminary.preliminaryMatches * 2 + i];
-      if (firstRoundMatches[i]) {
-        firstRoundMatches[i].team2 = byeTeam;
-      } else {
-        // If more byes than prelim matches, create new matches
-        firstRoundMatches.push({
-          id: `match-0-${matchPosition}`,
-          round: 0,
-          position: matchPosition,
-          team1: null,
-          team2: byeTeam,
-          score1: null,
-          score2: null,
-          winner: null,
-          completed: false,
-        });
-        matchPosition++;
+    // Handle bye teams if there's an odd number of preliminary winners
+    if (preliminary.byes > 0) {
+      const byeTeam = teams[preliminary.preliminaryMatches * 2];
+      // The bye team goes to the last match's team2 (or creates a new match if needed)
+      const lastMatch = firstRoundMatches[firstRoundMatches.length - 1];
+      if (lastMatch && lastMatch.team2 === null) {
+        lastMatch.team2 = byeTeam;
       }
     }
 
