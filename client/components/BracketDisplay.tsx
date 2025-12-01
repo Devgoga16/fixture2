@@ -8,9 +8,22 @@ interface BracketDisplayProps {
 }
 
 export function BracketDisplay({ bracket, onMatchClick }: BracketDisplayProps) {
-  const roundNames = bracket.rounds.map((_, idx) =>
-    getRoundName(idx - 1, bracket.rounds.length)
-  );
+  // Determine if the first round is preliminary
+  const isPreliminary = bracket.rounds[0]?.[0]?.round === -1;
+
+  const roundNames = bracket.rounds.map((_, idx) => {
+    if (isPreliminary) {
+      // For preliminary round
+      if (idx === 0) return "Fase Previa";
+      // For main bracket rounds, adjust the round number
+      const mainRoundNum = idx - 1;
+      const mainRoundsCount = bracket.rounds.length - 1;
+      return getRoundName(mainRoundNum, mainRoundsCount);
+    } else {
+      // No preliminary round
+      return getRoundName(idx, bracket.rounds.length);
+    }
+  });
 
   return (
     <div className="overflow-x-auto pb-6">
