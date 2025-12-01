@@ -60,9 +60,36 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
     setTeamInputText(updatedText);
   };
 
-  const handleStart = () => {
-    if (teams.length === teamCount) {
-      onTournamentStart(teams, teamCount);
+  const { toast } = useToast();
+
+  const handleStart = async () => {
+    if (teams.length !== teamCount) return;
+
+    try {
+      setIsLoading?.(true);
+
+      const tournamentData = await createTournament({
+        name: `Torneo ${new Date().toLocaleDateString()}`,
+        teams: teams.map((t) => ({ name: t.name })),
+      });
+
+      toast({
+        title: "Torneo creado",
+        description: "Tu torneo ha sido creado exitosamente",
+      });
+
+      onTournamentStart(teams, teamCount, tournamentData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "No se pudo crear el torneo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading?.(false);
     }
   };
 
