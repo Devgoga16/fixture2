@@ -67,7 +67,7 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
     if (teams.length !== teamCount) return;
 
     try {
-      setIsLoading?.(true);
+      setIsLoading(true);
 
       const tournamentData = await createTournament({
         name: `Torneo ${new Date().toLocaleDateString()}`,
@@ -90,7 +90,7 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
         variant: "destructive",
       });
     } finally {
-      setIsLoading?.(false);
+      setIsLoading(false);
     }
   };
 
