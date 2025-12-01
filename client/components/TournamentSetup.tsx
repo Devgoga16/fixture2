@@ -23,20 +23,19 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
     if (num > 0 && num <= 128) {
       setTeamCount(num);
       setTeams([]);
+      setTeamInputText("");
     }
   };
 
   const handleTeamInputChange = (value: string) => {
     setTeamInputText(value);
 
-    // Parse team names from textarea by line breaks
     const teamNames = value
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-      .slice(0, teamCount); // Limit to teamCount
+      .slice(0, teamCount);
 
-    // Create team objects
     const newTeams = teamNames.map((name, idx) => ({
       id: `team-${idx}`,
       name,
@@ -49,7 +48,6 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
     const updatedTeams = teams.filter(t => t.id !== id);
     setTeams(updatedTeams);
 
-    // Update the textarea to reflect removal
     const updatedText = updatedTeams
       .map(t => t.name)
       .join("\n");
@@ -67,7 +65,6 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Gestor de Torneo
@@ -76,10 +73,9 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Team Size Selection */}
           <Card className="p-8 border-0 shadow-lg bg-white">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">1. Cantidad de Equipos</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-semibold text-gray-700 mb-2 block">
@@ -95,7 +91,6 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
                 />
               </div>
 
-              {/* Quick buttons */}
               <div className="pt-4">
                 <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">Atajos rápidos</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -115,7 +110,6 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
                 </div>
               </div>
 
-              {/* Preliminary Round Info */}
               {preliminary.preliminaryMatches > 0 && (
                 <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded mt-4">
                   <p className="text-sm text-amber-800">
@@ -124,7 +118,6 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
                 </div>
               )}
 
-              {/* Bracket info */}
               <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
                 <p className="text-sm text-blue-800">
                   <span className="font-bold">Estructura:</span> {teamCount} equipos{preliminary.preliminaryMatches > 0 ? ` → ${preliminary.preliminaryMatches} fase${preliminary.preliminaryMatches !== 1 ? "s" : ""} previa → ` : " → "}Bracket de {teamCount - preliminary.preliminaryMatches * 2}
@@ -133,7 +126,6 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
             </div>
           </Card>
 
-          {/* Teams Input */}
           <Card className="p-8 border-0 shadow-lg bg-white flex flex-col">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">2. Equipos ({teams.length}/{teamCount})</h2>
 
@@ -181,7 +173,6 @@ Equipo 3
           </Card>
         </div>
 
-        {/* Start Button */}
         <div className="mt-12 flex justify-center">
           <Button
             onClick={handleStart}
