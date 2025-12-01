@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Team, Bracket } from "@/lib/tournament";
 import { TournamentSetup } from "@/components/TournamentSetup";
 import { TournamentDashboard } from "@/components/TournamentDashboard";
-import { TournamentData } from "@/services/tournament";
-import { useToast } from "@/hooks/use-toast";
+import type { TournamentData } from "@/services/tournament";
 
 export default function Index() {
   const [tournament, setTournament] = useState<{
