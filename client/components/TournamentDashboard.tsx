@@ -46,23 +46,25 @@ export function TournamentDashboard({
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 md:mb-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1 md:mb-2 truncate">
                 Torneo de Eliminación Directa
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm md:text-base text-gray-600 truncate">
                 {teamSize} equipos - {totalMatches} partidos en total
               </p>
             </div>
             <Button
               onClick={onReset}
               variant="outline"
-              className="gap-2"
+              className="gap-2 flex-shrink-0"
+              size="sm"
             >
               <RotateCcw className="w-4 h-4" />
-              Nuevo Torneo
+              <span className="hidden sm:inline">Nuevo Torneo</span>
+              <span className="sm:hidden">Nuevo</span>
             </Button>
           </div>
 
