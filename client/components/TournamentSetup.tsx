@@ -82,9 +82,7 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
       toast({
         title: "Error",
         description:
-          error instanceof Error
-            ? error.message
-            : "No se pudo crear el torneo",
+          error instanceof Error ? error.message : "No se pudo crear el torneo",
         variant: "destructive",
       });
     } finally {
