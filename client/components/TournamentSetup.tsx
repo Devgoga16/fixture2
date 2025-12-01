@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Team, calculatePreliminaryRound } from "@/lib/tournament";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface TournamentSetupProps {
   onTournamentStart: (teams: Team[], size: number) => void;
