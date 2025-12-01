@@ -3,10 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Team, calculatePreliminaryRound } from "@/lib/tournament";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader } from "lucide-react";
+import { createTournament, TournamentData } from "@/services/tournament";
+import { useToast } from "@/hooks/use-toast";
 
 interface TournamentSetupProps {
-  onTournamentStart: (teams: Team[], size: number) => void;
+  onTournamentStart: (
+    teams: Team[],
+    size: number,
+    tournamentData: TournamentData,
+  ) => void;
+  isLoading?: boolean;
+  setIsLoading?: (loading: boolean) => void;
 }
 
 export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
