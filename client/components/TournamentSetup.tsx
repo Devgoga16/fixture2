@@ -2,20 +2,29 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Team, TeamSize, calculatePreliminaryRound } from "@/lib/tournament";
+import { Team, calculatePreliminaryRound } from "@/lib/tournament";
 import { Trash2, Plus } from "lucide-react";
 
 interface TournamentSetupProps {
-  onTournamentStart: (teams: Team[], size: TeamSize) => void;
+  onTournamentStart: (teams: Team[], size: number) => void;
 }
 
 export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
-  const [teamCount, setTeamCount] = useState<TeamSize>(8);
+  const [teamCount, setTeamCount] = useState<number>(8);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamName, setTeamName] = useState("");
+  const [teamCountInput, setTeamCountInput] = useState<string>("8");
 
-  const teamOptions: TeamSize[] = [4, 8, 16, 32];
   const preliminary = calculatePreliminaryRound(teamCount);
+
+  const handleTeamCountChange = (value: string) => {
+    setTeamCountInput(value);
+    const num = parseInt(value) || 0;
+    if (num > 0 && num <= 128) {
+      setTeamCount(num);
+      setTeams([]);
+    }
+  };
 
   const addTeam = () => {
     if (teamName.trim() && teams.length < teamCount) {
@@ -52,32 +61,57 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
           <Card className="p-8 border-0 shadow-lg bg-white">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">1. Cantidad de Equipos</h2>
             
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {teamOptions.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => {
-                    setTeamCount(size);
-                    setTeams([]);
-                  }}
-                  className={`py-4 px-6 rounded-lg font-bold text-lg transition-all duration-200 ${
-                    teamCount === size
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">
+                  Número de equipos (2-128)
+                </label>
+                <Input
+                  type="number"
+                  min="2"
+                  max="128"
+                  value={teamCountInput}
+                  onChange={(e) => handleTeamCountChange(e.target.value)}
+                  className="text-lg font-bold h-12 border-2"
+                />
+              </div>
 
-            {preliminary.preliminaryMatches > 0 && (
-              <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
-                <p className="text-sm text-amber-800">
-                  <span className="font-bold">Información:</span> Se necesitarán {preliminary.preliminaryMatches} partidos en la fase previa. {preliminary.byes} equipo{preliminary.byes !== 1 ? "s" : ""} descansarán.
+              {/* Quick buttons */}
+              <div className="pt-4">
+                <p className="text-xs font-semibold text-gray-600 mb-3 uppercase">Atajos rápidos</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[4, 8, 16, 32].map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => handleTeamCountChange(String(size))}
+                      className={`py-2 px-3 rounded-lg font-bold text-sm transition-all duration-200 ${
+                        teamCount === size
+                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preliminary Round Info */}
+              {preliminary.preliminaryMatches > 0 && (
+                <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded mt-4">
+                  <p className="text-sm text-amber-800">
+                    <span className="font-bold">Fase Previa:</span> Se necesitarán <span className="font-bold">{preliminary.preliminaryMatches}</span> partido{preliminary.preliminaryMatches !== 1 ? "s" : ""} en la fase previa. {preliminary.byes > 0 ? `${preliminary.byes} equipo${preliminary.byes !== 1 ? "s" : ""} descansará${preliminary.byes !== 1 ? "n" : ""} en esa ronda.` : ""}
+                  </p>
+                </div>
+              )}
+
+              {/* Bracket info */}
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                <p className="text-sm text-blue-800">
+                  <span className="font-bold">Estructura:</span> {teamCount} equipos{preliminary.preliminaryMatches > 0 ? ` → ${preliminary.preliminaryMatches} fase${preliminary.preliminaryMatches !== 1 ? "s" : ""} previa → ` : " → "}Bracket de {teamCount - preliminary.preliminaryMatches * 2}
                 </p>
               </div>
-            )}
+            </div>
           </Card>
 
           {/* Teams Input */}
@@ -139,7 +173,7 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            {canStart ? "Iniciar Torneo" : `Faltan ${teamCount - teams.length} equipo(s)`}
+            {canStart ? "Iniciar Torneo" : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
           </Button>
         </div>
       </div>
