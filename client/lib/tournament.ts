@@ -23,6 +23,18 @@ export interface Bracket {
 }
 
 /**
+ * Find the largest power of 2 that is <= n
+ */
+function largestPowerOf2LessThanOrEqual(n: number): number {
+  if (n < 1) return 1;
+  let power = 1;
+  while (power * 2 <= n) {
+    power *= 2;
+  }
+  return power;
+}
+
+/**
  * Calculate preliminary round matches for teams that don't fit into a power of 2 bracket
  * For example: 17 teams → 1 preliminary match (17 - 16 = 1 extra) → 16-team main bracket
  * For example: 20 teams → 2 preliminary matches (20 - 16 = 4 extra) → 16-team main bracket
@@ -64,7 +76,6 @@ export function generateBracket(teams: Team[]): Bracket {
   const preliminary = calculatePreliminaryRound(teamCount);
 
   // Generate preliminary round if needed
-  let firstRoundTeamsCount = teamCount;
   if (preliminary.preliminaryMatches > 0) {
     const prelimRound: Match[] = [];
     for (let i = 0; i < preliminary.preliminaryMatches; i++) {
@@ -82,44 +93,31 @@ export function generateBracket(teams: Team[]): Bracket {
     }
     rounds.push(prelimRound);
 
-    // First round will have preliminary winners + bye teams
-    // Number of teams in first main round = preliminary winners + byes
-    firstRoundTeamsCount = preliminary.preliminaryMatches + preliminary.byes;
-
-    // Build first round with placeholder structure
-    // Preliminary winners will be in team1 positions (filled as matches are completed)
-    // Bye teams will be in team2 positions
+    // Build the first round of the main bracket
+    // It will contain preliminary winners (as null slots) and bye teams
     const firstRoundMatches: Match[] = [];
+    let matchPosition = 0;
 
-    // Create matches pairing preliminary winners
+    // Create slots for preliminary winners
+    // Each pair of preliminary matches feeds into one first-round match
     for (let i = 0; i < preliminary.preliminaryMatches; i += 2) {
-      const position = Math.floor(i / 2);
       firstRoundMatches.push({
-        id: `match-0-${position}`,
+        id: `match-0-${matchPosition}`,
         round: 0,
-        position: position,
+        position: matchPosition,
         team1: null, // Will be filled with prelim winner i
-        team2: i + 1 < preliminary.preliminaryMatches ? null : null, // Will be filled with prelim winner i+1 or bye team
+        team2: i + 1 < preliminary.preliminaryMatches ? null : (preliminary.byes > 0 ? teams[preliminary.preliminaryMatches * 2] : null), // prelim winner i+1 or bye team
         score1: null,
         score2: null,
         winner: null,
         completed: false,
       });
-    }
-
-    // Handle bye teams if there's an odd number of preliminary winners
-    if (preliminary.byes > 0) {
-      const byeTeam = teams[preliminary.preliminaryMatches * 2];
-      // The bye team goes to the last match's team2 (or creates a new match if needed)
-      const lastMatch = firstRoundMatches[firstRoundMatches.length - 1];
-      if (lastMatch && lastMatch.team2 === null) {
-        lastMatch.team2 = byeTeam;
-      }
+      matchPosition++;
     }
 
     rounds.push(firstRoundMatches);
 
-    // Generate remaining bracket rounds
+    // Generate remaining main bracket rounds after first round
     let currentRoundTeams = Array(firstRoundMatches.length).fill(null);
     let roundNum = 1;
 
@@ -211,13 +209,27 @@ export function updateMatchResult(
   // Propagate winner to next round
   if (roundIndex + 1 < newBracket.rounds.length && winner) {
     const nextRound = newBracket.rounds[roundIndex + 1];
-    const nextMatchIndex = Math.floor(matchIndex / 2);
-
-    if (nextRound[nextMatchIndex]) {
-      if (matchIndex % 2 === 0) {
-        nextRound[nextMatchIndex].team1 = winner;
-      } else {
-        nextRound[nextMatchIndex].team2 = winner;
+    
+    // Special handling for preliminary round (round -1) → first main round (round 0)
+    if (roundIndex === 0 && newBracket.rounds[0][0]?.round === -1) {
+      // This is preliminary round
+      const nextMatchIndex = Math.floor(matchIndex / 2);
+      if (nextRound[nextMatchIndex]) {
+        if (matchIndex % 2 === 0) {
+          nextRound[nextMatchIndex].team1 = winner;
+        } else {
+          nextRound[nextMatchIndex].team2 = winner;
+        }
+      }
+    } else {
+      // Regular round progression
+      const nextMatchIndex = Math.floor(matchIndex / 2);
+      if (nextRound[nextMatchIndex]) {
+        if (matchIndex % 2 === 0) {
+          nextRound[nextMatchIndex].team1 = winner;
+        } else {
+          nextRound[nextMatchIndex].team2 = winner;
+        }
       }
     }
   }
