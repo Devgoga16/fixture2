@@ -12,7 +12,7 @@ interface TournamentSetupProps {
 export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
   const [teamCount, setTeamCount] = useState<number>(8);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [teamName, setTeamName] = useState("");
+  const [teamInputText, setTeamInputText] = useState("");
   const [teamCountInput, setTeamCountInput] = useState<string>("8");
 
   const preliminary = calculatePreliminaryRound(teamCount);
@@ -26,15 +26,34 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
     }
   };
 
-  const addTeam = () => {
-    if (teamName.trim() && teams.length < teamCount) {
-      setTeams([...teams, { id: `team-${Date.now()}`, name: teamName }]);
-      setTeamName("");
-    }
+  const handleTeamInputChange = (value: string) => {
+    setTeamInputText(value);
+
+    // Parse team names from textarea by line breaks
+    const teamNames = value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .slice(0, teamCount); // Limit to teamCount
+
+    // Create team objects
+    const newTeams = teamNames.map((name, idx) => ({
+      id: `team-${idx}`,
+      name,
+    }));
+
+    setTeams(newTeams);
   };
 
   const removeTeam = (id: string) => {
-    setTeams(teams.filter(t => t.id !== id));
+    const updatedTeams = teams.filter(t => t.id !== id);
+    setTeams(updatedTeams);
+
+    // Update the textarea to reflect removal
+    const updatedText = updatedTeams
+      .map(t => t.name)
+      .join("\n");
+    setTeamInputText(updatedText);
   };
 
   const handleStart = () => {
