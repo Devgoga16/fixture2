@@ -3,18 +3,22 @@ import {
   Bracket,
   Match,
   Team,
-  generateBracket,
   updateMatchResult,
 } from "@/lib/tournament";
 import { BracketDisplay } from "./BracketDisplay";
 import { MatchResultDialog } from "./MatchResultDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RotateCcw, Trophy, Users } from "lucide-react";
+import { RotateCcw, Trophy, Users, Loader } from "lucide-react";
+import { updateMatchResult as updateMatchResultAPI, resetTournament } from "@/services/tournament";
+import { useToast } from "@/hooks/use-toast";
 
 interface TournamentDashboardProps {
   teams: Team[];
   teamSize: number;
+  tournamentId: string;
+  bracket: Bracket;
+  onBracketUpdate: (bracket: Bracket) => void;
   onReset: () => void;
 }
 
