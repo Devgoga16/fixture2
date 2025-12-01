@@ -3,10 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Team, calculatePreliminaryRound } from "@/lib/tournament";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader } from "lucide-react";
+import { createTournament, TournamentData } from "@/services/tournament";
+import { useToast } from "@/hooks/use-toast";
 
 interface TournamentSetupProps {
-  onTournamentStart: (teams: Team[], size: number) => void;
+  onTournamentStart: (
+    teams: Team[],
+    size: number,
+    tournamentData: TournamentData,
+  ) => void;
 }
 
 export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
@@ -14,6 +20,7 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamInputText, setTeamInputText] = useState("");
   const [teamCountInput, setTeamCountInput] = useState<string>("8");
+  const [isLoading, setIsLoading] = useState(false);
 
   const preliminary = calculatePreliminaryRound(teamCount);
 
@@ -52,9 +59,34 @@ export function TournamentSetup({ onTournamentStart }: TournamentSetupProps) {
     setTeamInputText(updatedText);
   };
 
-  const handleStart = () => {
-    if (teams.length === teamCount) {
-      onTournamentStart(teams, teamCount);
+  const { toast } = useToast();
+
+  const handleStart = async () => {
+    if (teams.length !== teamCount) return;
+
+    try {
+      setIsLoading(true);
+
+      const tournamentData = await createTournament({
+        name: `Torneo ${new Date().toLocaleDateString()}`,
+        teams: teams.map((t) => ({ name: t.name })),
+      });
+
+      toast({
+        title: "Torneo creado",
+        description: "Tu torneo ha sido creado exitosamente",
+      });
+
+      onTournamentStart(teams, teamCount, tournamentData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "No se pudo crear el torneo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -198,17 +230,20 @@ Equipo 3
         <div className="mt-12 flex justify-center">
           <Button
             onClick={handleStart}
-            disabled={!canStart}
+            disabled={!canStart || isLoading}
             size="lg"
-            className={`px-12 py-6 text-lg font-bold rounded-lg transition-all duration-200 ${
-              canStart
+            className={`px-12 py-6 text-lg font-bold rounded-lg transition-all duration-200 flex items-center gap-2 ${
+              canStart && !isLoading
                 ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-2xl hover:scale-105"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            {canStart
-              ? "Iniciar Torneo"
-              : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
+            {isLoading && <Loader className="w-5 h-5 animate-spin" />}
+            {isLoading
+              ? "Creando Torneo..."
+              : canStart
+                ? "Iniciar Torneo"
+                : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
           </Button>
         </div>
       </div>

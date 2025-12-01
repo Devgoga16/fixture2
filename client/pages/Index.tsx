@@ -1,16 +1,34 @@
 import { useState } from "react";
-import { Team } from "@/lib/tournament";
+import { Team, Bracket } from "@/lib/tournament";
 import { TournamentSetup } from "@/components/TournamentSetup";
 import { TournamentDashboard } from "@/components/TournamentDashboard";
+import type { TournamentData } from "@/services/tournament";
 
 export default function Index() {
   const [tournament, setTournament] = useState<{
     teams: Team[];
     size: number;
+    id: string;
+    bracket: Bracket;
   } | null>(null);
 
-  const handleTournamentStart = (teams: Team[], size: number) => {
-    setTournament({ teams, size });
+  const handleTournamentStart = async (
+    teams: Team[],
+    size: number,
+    tournamentData: TournamentData,
+  ) => {
+    setTournament({
+      teams,
+      size,
+      id: tournamentData.id,
+      bracket: tournamentData.bracket,
+    });
+  };
+
+  const handleBracketUpdate = (bracket: Bracket) => {
+    if (tournament) {
+      setTournament({ ...tournament, bracket });
+    }
   };
 
   const handleReset = () => {
@@ -25,6 +43,9 @@ export default function Index() {
     <TournamentDashboard
       teams={tournament.teams}
       teamSize={tournament.size}
+      tournamentId={tournament.id}
+      bracket={tournament.bracket}
+      onBracketUpdate={handleBracketUpdate}
       onReset={handleReset}
     />
   );

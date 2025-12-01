@@ -3,29 +3,39 @@ import {
   Bracket,
   Match,
   Team,
-  generateBracket,
   updateMatchResult,
 } from "@/lib/tournament";
 import { BracketDisplay } from "./BracketDisplay";
 import { MatchResultDialog } from "./MatchResultDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RotateCcw, Trophy, Users } from "lucide-react";
+import { RotateCcw, Trophy, Users, Loader } from "lucide-react";
+import { updateMatchResult as updateMatchResultAPI, resetTournament } from "@/services/tournament";
+import { useToast } from "@/hooks/use-toast";
 
 interface TournamentDashboardProps {
   teams: Team[];
   teamSize: number;
+  tournamentId: string;
+  bracket: Bracket;
+  onBracketUpdate: (bracket: Bracket) => void;
   onReset: () => void;
 }
 
 export function TournamentDashboard({
   teams,
   teamSize,
+  tournamentId,
+  bracket: initialBracket,
+  onBracketUpdate,
   onReset,
 }: TournamentDashboardProps) {
-  const [bracket, setBracket] = useState<Bracket>(() => generateBracket(teams));
+  const [bracket, setBracket] = useState<Bracket>(initialBracket);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const { toast } = useToast();
 
   const handleMatchClick = (match: Match) => {
     if (match.team1 && match.team2) {
@@ -34,16 +44,66 @@ export function TournamentDashboard({
     }
   };
 
-  const handleSaveResult = (score1: number, score2: number) => {
-    if (selectedMatch) {
-      const newBracket = updateMatchResult(
-        bracket,
+  const handleSaveResult = async (score1: number, score2: number) => {
+    if (!selectedMatch) return;
+
+    try {
+      setIsSaving(true);
+
+      const response = await updateMatchResultAPI(
+        tournamentId,
         selectedMatch.id,
-        score1,
-        score2,
+        { score1, score2 },
       );
+
+      const newBracket = response.bracket;
       setBracket(newBracket);
+      onBracketUpdate(newBracket);
       setSelectedMatch(null);
+
+      toast({
+        title: "Resultado guardado",
+        description: "El resultado ha sido guardado correctamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "No se pudo guardar el resultado",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleResetTournament = async () => {
+    if (!confirm("¿Estás seguro de que deseas reiniciar el torneo?")) return;
+
+    try {
+      setIsResetting(true);
+
+      await resetTournament(tournamentId);
+
+      toast({
+        title: "Torneo reiniciado",
+        description: "El torneo ha sido reiniciado correctamente",
+      });
+
+      onReset();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "No se pudo reiniciar el torneo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -70,14 +130,21 @@ export function TournamentDashboard({
               </p>
             </div>
             <Button
-              onClick={onReset}
+              onClick={handleResetTournament}
+              disabled={isResetting}
               variant="outline"
               className="gap-2 flex-shrink-0"
               size="sm"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span className="hidden sm:inline">Nuevo Torneo</span>
-              <span className="sm:hidden">Nuevo</span>
+              {isResetting ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                <RotateCcw className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">
+                {isResetting ? "Reiniciando..." : "Nuevo Torneo"}
+              </span>
+              <span className="sm:hidden">{isResetting ? "..." : "Nuevo"}</span>
             </Button>
           </div>
 
