@@ -1,4 +1,4 @@
-export type TeamSize = 4 | 8 | 16 | 32;
+export type TeamSize = number;
 
 export interface Team {
   id: string;
@@ -23,29 +23,36 @@ export interface Bracket {
 }
 
 /**
- * Calculate preliminary round matches for teams that don't fit evenly
- * Returns an array of byes (teams that skip the preliminary round)
+ * Calculate preliminary round matches for teams that don't fit into a power of 2 bracket
+ * For example: 17 teams → 1 preliminary match (17 - 16 = 1 extra) → 16-team main bracket
+ * For example: 20 teams → 2 preliminary matches (20 - 16 = 4 extra) → 16-team main bracket
  */
 export function calculatePreliminaryRound(teamCount: number): {
   preliminaryMatches: number;
   byes: number;
 } {
-  const validSizes: TeamSize[] = [4, 8, 16, 32];
-  
-  // Find the next valid bracket size
-  const nextSize = validSizes.find(size => size >= teamCount);
-  
-  if (!nextSize || teamCount <= 0) {
+  if (teamCount <= 0) {
     return { preliminaryMatches: 0, byes: 0 };
   }
 
-  if (teamCount <= nextSize) {
-    const byes = nextSize - teamCount;
-    const preliminaryMatches = teamCount - byes;
-    return { preliminaryMatches: Math.max(0, preliminaryMatches), byes };
+  // Find the largest power of 2 that is <= teamCount
+  let largestPowerBelow = 1;
+  while (largestPowerBelow * 2 <= teamCount) {
+    largestPowerBelow *= 2;
   }
 
-  return { preliminaryMatches: 0, byes: 0 };
+  const mainBracketSize = largestPowerBelow;
+
+  if (teamCount <= mainBracketSize) {
+    return { preliminaryMatches: 0, byes: 0 };
+  }
+
+  // Teams that exceed the main bracket size need preliminary matches
+  const extraTeams = teamCount - mainBracketSize;
+  const preliminaryMatches = Math.ceil(extraTeams / 2);
+  const byes = extraTeams % 2; // If odd number of extra teams, one team gets a bye in preliminary
+
+  return { preliminaryMatches, byes };
 }
 
 /**
