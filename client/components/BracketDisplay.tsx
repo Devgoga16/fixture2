@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Bracket, Match, getRoundName } from "@/lib/tournament";
 import { Card } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 
 interface BracketDisplayProps {
   bracket: Bracket;
@@ -10,6 +11,21 @@ interface BracketDisplayProps {
 export function BracketDisplay({ bracket, onMatchClick }: BracketDisplayProps) {
   // Determine if the first round is preliminary
   const isPreliminary = bracket.rounds[0]?.[0]?.round === -1;
+
+  // Track which phases are expanded (all expanded by default)
+  const [expandedPhases, setExpandedPhases] = useState<Set<number>>(
+    new Set(bracket.rounds.map((_, idx) => idx))
+  );
+
+  const togglePhase = (roundIdx: number) => {
+    const newExpanded = new Set(expandedPhases);
+    if (newExpanded.has(roundIdx)) {
+      newExpanded.delete(roundIdx);
+    } else {
+      newExpanded.add(roundIdx);
+    }
+    setExpandedPhases(newExpanded);
+  };
 
   const roundNames = bracket.rounds.map((_, idx) => {
     if (isPreliminary) {
@@ -28,33 +44,51 @@ export function BracketDisplay({ bracket, onMatchClick }: BracketDisplayProps) {
   return (
     <div className="overflow-x-auto pb-6">
       <div className="min-w-full flex gap-6 p-6">
-        {bracket.rounds.map((round, roundIdx) => (
-          <div key={roundIdx} className="flex-none">
-            <div className="mb-4">
-              <h3 className="text-sm font-bold text-gray-700 text-center px-4">
-                {roundNames[roundIdx]}
-              </h3>
-              <p className="text-xs text-gray-500 text-center mt-1">
-                {round.length} partido{round.length !== 1 ? "s" : ""}
-              </p>
-            </div>
+        {bracket.rounds.map((round, roundIdx) => {
+          const isExpanded = expandedPhases.has(roundIdx);
 
-            <div
-              className="space-y-6 flex flex-col justify-center"
-              style={{
-                minHeight: `${Math.max(400, round.length * 120)}px`,
-              }}
-            >
-              {round.map((match, matchIdx) => (
-                <MatchCard
-                  key={match.id}
-                  match={match}
-                  onClick={() => onMatchClick(match)}
-                />
-              ))}
+          return (
+            <div key={roundIdx} className="flex-none">
+              <button
+                onClick={() => togglePhase(roundIdx)}
+                className="mb-4 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                <div className="flex-1 text-center">
+                  <h3 className="text-sm font-bold text-gray-700">
+                    {roundNames[roundIdx]}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {round.length} partido{round.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-600 transition-transform ${
+                      isExpanded ? "rotate-0" : "-rotate-90"
+                    }`}
+                  />
+                </div>
+              </button>
+
+              {isExpanded && (
+                <div
+                  className="space-y-6 flex flex-col justify-center"
+                  style={{
+                    minHeight: `${Math.max(400, round.length * 120)}px`,
+                  }}
+                >
+                  {round.map((match, matchIdx) => (
+                    <MatchCard
+                      key={match.id}
+                      match={match}
+                      onClick={() => onMatchClick(match)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
