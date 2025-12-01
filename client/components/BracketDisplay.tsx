@@ -81,15 +81,15 @@ function MatchCard({ match, onClick }: MatchCardProps) {
     >
       <div className="p-3 md:p-4 min-w-52 md:min-w-64">
         {/* Team 1 */}
-        <div className="flex items-center gap-3 mb-3 pb-3 border-b">
+        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3 pb-2 md:pb-3 border-b">
           {match.team1 ? (
             <>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{match.team1.name}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{match.team1.name}</p>
               </div>
               {isComplete && (
                 <span
-                  className={`font-bold text-lg ${
+                  className={`font-bold text-base md:text-lg flex-shrink-0 ${
                     match.winner?.id === match.team1.id
                       ? "text-green-600"
                       : "text-gray-400"
@@ -100,20 +100,20 @@ function MatchCard({ match, onClick }: MatchCardProps) {
               )}
             </>
           ) : (
-            <span className="text-gray-400 italic">Por definir</span>
+            <span className="text-gray-400 italic text-xs md:text-sm">Por definir</span>
           )}
         </div>
 
         {/* Team 2 */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {match.team2 ? (
             <>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{match.team2.name}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{match.team2.name}</p>
               </div>
               {isComplete && (
                 <span
-                  className={`font-bold text-lg ${
+                  className={`font-bold text-base md:text-lg flex-shrink-0 ${
                     match.winner?.id === match.team2.id
                       ? "text-green-600"
                       : "text-gray-400"
@@ -124,20 +124,21 @@ function MatchCard({ match, onClick }: MatchCardProps) {
               )}
             </>
           ) : (
-            <span className="text-gray-400 italic">Por definir</span>
+            <span className="text-gray-400 italic text-xs md:text-sm">Por definir</span>
           )}
         </div>
 
         {/* Status */}
         {!isComplete && match.team1 && match.team2 && (
-          <div className="flex items-center justify-center mt-3 pt-3 border-t text-xs font-medium text-blue-600">
-            <ChevronRight className="w-3 h-3 mr-1" />
-            Haz clic para ingresar resultado
+          <div className="flex items-center justify-center mt-2 md:mt-3 pt-2 md:pt-3 border-t text-xs font-medium text-blue-600 gap-1">
+            <ChevronRight className="w-3 h-3" />
+            <span className="hidden md:inline">Haz clic para ingresar resultado</span>
+            <span className="md:hidden">Haz clic</span>
           </div>
         )}
 
         {isComplete && (
-          <div className="mt-3 pt-3 border-t text-center">
+          <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t text-center">
             <p className="text-xs font-bold text-green-600">✓ Completado</p>
           </div>
         )}
