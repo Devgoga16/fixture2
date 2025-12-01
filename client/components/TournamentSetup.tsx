@@ -233,17 +233,20 @@ Equipo 3
         <div className="mt-12 flex justify-center">
           <Button
             onClick={handleStart}
-            disabled={!canStart}
+            disabled={!canStart || isLoading}
             size="lg"
-            className={`px-12 py-6 text-lg font-bold rounded-lg transition-all duration-200 ${
-              canStart
+            className={`px-12 py-6 text-lg font-bold rounded-lg transition-all duration-200 flex items-center gap-2 ${
+              canStart && !isLoading
                 ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-2xl hover:scale-105"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            {canStart
-              ? "Iniciar Torneo"
-              : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
+            {isLoading && <Loader className="w-5 h-5 animate-spin" />}
+            {isLoading
+              ? "Creando Torneo..."
+              : canStart
+                ? "Iniciar Torneo"
+                : `Faltan ${teamCount - teams.length} equipo${teamCount - teams.length !== 1 ? "s" : ""}`}
           </Button>
         </div>
       </div>
