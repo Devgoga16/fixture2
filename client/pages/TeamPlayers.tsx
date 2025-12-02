@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Users, Loader2, User, UserPlus } from "lucide-react";
 import { AddPlayerDialog } from "@/components/AddPlayerDialog";
+import { getTeamPlayers } from "@/services/team";
 
 export function TeamPlayers() {
   const { teamId } = useParams<{ teamId: string }>();
@@ -25,13 +26,7 @@ export function TeamPlayers() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:3000/api/teams/${teamId}/players`);
-      
-      if (!response.ok) {
-        throw new Error("Error al cargar los jugadores");
-      }
-
-      const players = await response.json();
+      const players = await getTeamPlayers(teamId);
       setData(players);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cargar los jugadores");

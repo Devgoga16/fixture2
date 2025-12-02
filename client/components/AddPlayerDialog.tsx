@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Search, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { searchDNI, addPlayers } from "@/services/team";
 
 interface AddPlayerDialogProps {
   open: boolean;
@@ -53,15 +54,7 @@ export function AddPlayerDialog({
 
     try {
       setIsSearching(true);
-      const response = await fetch(
-        `/api/dni/search?numero=${dni}`
-      );
-
-      if (!response.ok) {
-        throw new Error("No se pudo consultar el DNI");
-      }
-
-      const data: DNIResponse = await response.json();
+      const data = await searchDNI(dni);
       
       // Construir nombre completo
       const fullNameValue = `${data.apellidoPaterno} ${data.apellidoMaterno} ${data.nombres}`.trim();
@@ -100,28 +93,7 @@ export function AddPlayerDialog({
 
     try {
       setIsSaving(true);
-      const response = await fetch(
-        `http://localhost:3000/api/teams/${teamId}/players`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            players: [
-              {
-                fullName,
-                dni,
-              },
-            ],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error al agregar jugador");
-      }
+      await addPlayers(teamId, [{ fullName, dni }]);
 
       toast({
         title: "Jugador agregado",
