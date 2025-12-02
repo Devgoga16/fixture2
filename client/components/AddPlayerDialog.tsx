@@ -54,13 +54,7 @@ export function AddPlayerDialog({
     try {
       setIsSearching(true);
       const response = await fetch(
-        `https://api.apis.net.pe/v1/dni?numero=${dni}`,
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: "Bearer apis-token-3781",
-          },
-        }
+        `/api/dni/search?numero=${dni}`
       );
 
       if (!response.ok) {
@@ -114,8 +108,12 @@ export function AddPlayerDialog({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            dni,
-            fullName,
+            players: [
+              {
+                fullName,
+                dni,
+              },
+            ],
           }),
         }
       );
