@@ -73,3 +73,20 @@ export interface TournamentListItem {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * Player types
+ */
+export interface Player {
+  id: string;
+  fullName: string;
+  dni: string;
+  createdAt: string;
+}
+
+export interface TeamPlayersResponse {
+  teamId: string;
+  teamName: string;
+  players: Player[];
+  totalPlayers: number;
+}

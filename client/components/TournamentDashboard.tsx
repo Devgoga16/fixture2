@@ -9,7 +9,7 @@ import { BracketDisplay } from "./BracketDisplay";
 import { MatchResultDialog } from "./MatchResultDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RotateCcw, Trophy, Users, Loader, Home, Activity, Calendar, Award, Lock, Unlock } from "lucide-react";
+import { RotateCcw, Trophy, Users, Loader, Home, Activity, Calendar, Award, Lock, Unlock, Eye } from "lucide-react";
 import { updateMatchResult as updateMatchResultAPI, resetTournament } from "@/services/tournament";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -294,18 +294,28 @@ export function TournamentDashboard({
             </h2>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {teams.map((team, idx) => (
                 <div
                   key={team.id}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/60 hover:bg-white border border-transparent hover:border-blue-200 transition-all group"
+                  className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-white/60 hover:bg-white border border-transparent hover:border-blue-200 transition-all group"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                    {idx + 1}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold group-hover:bg-blue-500 group-hover:text-white transition-colors flex-shrink-0">
+                      {idx + 1}
+                    </div>
+                    <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors truncate">
+                      {team.name}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">
-                    {team.name}
-                  </span>
+                  <Button
+                    onClick={() => navigate(`/team/${team.id}/players`)}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex-shrink-0"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
             </div>
