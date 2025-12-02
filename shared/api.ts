@@ -40,11 +40,11 @@ export interface TournamentData {
   id: string;
   name: string;
   status: "draft" | "in_progress" | "completed";
-  total_teams: number;
+  totalTeams: number;
   teams: Team[];
   bracket: Bracket;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateTournamentRequest {
@@ -60,4 +60,16 @@ export interface UpdateMatchRequest {
 export interface UpdateMatchResponse {
   bracket: Bracket;
   match: Match;
+}
+
+/**
+ * Tournament list item from GET /api/tournaments
+ */
+export interface TournamentListItem {
+  id: string;
+  name: string;
+  status: "draft" | "in_progress" | "completed";
+  totalTeams: number;
+  createdAt: string;
+  updatedAt: string;
 }

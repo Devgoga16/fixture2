@@ -6,13 +6,12 @@ import { ChevronRight, ChevronDown } from "lucide-react";
 interface BracketDisplayProps {
   bracket: Bracket;
   onMatchClick: (match: Match) => void;
+  isAdminMode?: boolean;
 }
 
-export function BracketDisplay({ bracket, onMatchClick }: BracketDisplayProps) {
-  // Determine if the first round is preliminary
+export function BracketDisplay({ bracket, onMatchClick, isAdminMode = true }: BracketDisplayProps) {
   const isPreliminary = bracket.rounds[0]?.[0]?.round === -1;
 
-  // Track which phases are expanded (all expanded by default)
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(
     new Set(bracket.rounds.map((_, idx) => idx))
   );
@@ -29,14 +28,11 @@ export function BracketDisplay({ bracket, onMatchClick }: BracketDisplayProps) {
 
   const roundNames = bracket.rounds.map((_, idx) => {
     if (isPreliminary) {
-      // For preliminary round
       if (idx === 0) return "Fase Previa";
-      // For main bracket rounds, adjust the round number
       const mainRoundNum = idx - 1;
       const mainRoundsCount = bracket.rounds.length - 1;
       return getRoundName(mainRoundNum, mainRoundsCount);
     } else {
-      // No preliminary round
       return getRoundName(idx, bracket.rounds.length);
     }
   });
@@ -51,21 +47,20 @@ export function BracketDisplay({ bracket, onMatchClick }: BracketDisplayProps) {
             <div key={roundIdx} className="flex-none">
               <button
                 onClick={() => togglePhase(roundIdx)}
-                className="mb-4 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                className="mb-4 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer group"
               >
                 <div className="flex-1 text-center">
-                  <h3 className="text-sm font-bold text-gray-700">
+                  <h3 className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
                     {roundNames[roundIdx]}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     {round.length} partido{round.length !== 1 ? "s" : ""}
                   </p>
                 </div>
                 <div className="flex-shrink-0">
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-600 transition-transform ${
-                      isExpanded ? "rotate-0" : "-rotate-90"
-                    }`}
+                    className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? "rotate-0" : "-rotate-90"
+                      }`}
                   />
                 </div>
               </button>
@@ -101,89 +96,127 @@ interface MatchCardProps {
 
 function MatchCard({ match, onClick }: MatchCardProps) {
   const isComplete = match.completed;
+  const canPlay = match.team1 && match.team2 && !isComplete;
+  const isPending = !match.team1 || !match.team2;
 
   return (
     <Card
       onClick={onClick}
-      className={`cursor-pointer transition-all duration-200 border-2 hover:shadow-lg ${
-        isComplete
-          ? "border-green-200 bg-green-50"
-          : match.team1 && match.team2
-            ? "border-blue-200 bg-white hover:border-blue-400"
-            : "border-gray-200 bg-gray-50"
-      }`}
+      className={`cursor-pointer transition-all duration-200 ${isComplete
+        ? "border-2 border-emerald-400 bg-emerald-50/50 hover:border-emerald-500 hover:shadow-lg"
+        : canPlay
+          ? "border-2 border-blue-400 bg-blue-50/30 hover:border-blue-500 hover:shadow-lg hover:bg-blue-50/50"
+          : "border border-slate-200 bg-slate-50/50 cursor-default"
+        }`}
     >
-      <div className="p-3 md:p-4 min-w-52 md:min-w-64">
+      <div className="p-4 min-w-56 md:min-w-64">
+        {/* Match Status Badge */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            {isComplete ? (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-100 rounded-md">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span className="text-xs font-bold text-emerald-700">Finalizado</span>
+              </div>
+            ) : canPlay ? (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-100 rounded-md">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-bold text-blue-700">Pendiente</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-md">
+                <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
+                <span className="text-xs font-bold text-slate-500">Esperando</span>
+              </div>
+            )}
+          </div>
+
+          {canPlay && (
+            <ChevronRight className="w-4 h-4 text-blue-500" />
+          )}
+        </div>
+
         {/* Team 1 */}
-        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3 pb-2 md:pb-3 border-b">
+        <div className={`flex items-center justify-between p-3 rounded-lg mb-2 ${isComplete && match.winner?.id === match.team1?.id
+          ? "bg-emerald-100/80 border-2 border-emerald-300"
+          : "bg-white/60 border border-slate-200"
+          }`}>
           {match.team1 ? (
             <>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {isComplete && match.winner?.id === match.team1.id && (
+                  <span className="text-base flex-shrink-0">🏆</span>
+                )}
+                <p className={`font-semibold text-sm truncate ${isComplete && match.winner?.id === match.team1.id
+                  ? "text-emerald-800"
+                  : "text-slate-800"
+                  }`}>
                   {match.team1.name}
                 </p>
               </div>
               {isComplete && (
-                <span
-                  className={`font-bold text-base md:text-lg flex-shrink-0 ${
-                    match.winner?.id === match.team1.id
-                      ? "text-green-600"
-                      : "text-gray-400"
-                  }`}
-                >
+                <span className={`font-black text-xl ml-2 ${match.winner?.id === match.team1.id
+                  ? "text-emerald-700"
+                  : "text-slate-400"
+                  }`}>
                   {match.score1}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-gray-400 italic text-xs md:text-sm">
-              Por definir
+            <span className="text-slate-400 italic text-sm">
+              Ganador por definir
             </span>
           )}
         </div>
 
+        {/* VS Divider */}
+        <div className="flex items-center justify-center my-2">
+          <div className="flex-1 h-px bg-slate-200"></div>
+          <span className="px-3 text-xs font-bold text-slate-400">VS</span>
+          <div className="flex-1 h-px bg-slate-200"></div>
+        </div>
+
         {/* Team 2 */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className={`flex items-center justify-between p-3 rounded-lg ${isComplete && match.winner?.id === match.team2?.id
+          ? "bg-emerald-100/80 border-2 border-emerald-300"
+          : "bg-white/60 border border-slate-200"
+          }`}>
           {match.team2 ? (
             <>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {isComplete && match.winner?.id === match.team2.id && (
+                  <span className="text-base flex-shrink-0">🏆</span>
+                )}
+                <p className={`font-semibold text-sm truncate ${isComplete && match.winner?.id === match.team2.id
+                  ? "text-emerald-800"
+                  : "text-slate-800"
+                  }`}>
                   {match.team2.name}
                 </p>
               </div>
               {isComplete && (
-                <span
-                  className={`font-bold text-base md:text-lg flex-shrink-0 ${
-                    match.winner?.id === match.team2.id
-                      ? "text-green-600"
-                      : "text-gray-400"
-                  }`}
-                >
+                <span className={`font-black text-xl ml-2 ${match.winner?.id === match.team2.id
+                  ? "text-emerald-700"
+                  : "text-slate-400"
+                  }`}>
                   {match.score2}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-gray-400 italic text-xs md:text-sm">
-              Por definir
+            <span className="text-slate-400 italic text-sm">
+              Ganador por definir
             </span>
           )}
         </div>
 
-        {/* Status */}
-        {!isComplete && match.team1 && match.team2 && (
-          <div className="flex items-center justify-center mt-2 md:mt-3 pt-2 md:pt-3 border-t text-xs font-medium text-blue-600 gap-1">
-            <ChevronRight className="w-3 h-3" />
-            <span className="hidden md:inline">
-              Haz clic para ingresar resultado
-            </span>
-            <span className="md:hidden">Haz clic</span>
-          </div>
-        )}
-
-        {isComplete && (
-          <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t text-center">
-            <p className="text-xs font-bold text-green-600">✓ Completado</p>
+        {/* Action hint */}
+        {canPlay && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <p className="text-xs text-center font-medium text-blue-600">
+              Toca para ingresar resultado
+            </p>
           </div>
         )}
       </div>

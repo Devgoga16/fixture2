@@ -3,7 +3,7 @@
  * Change the API_BASE_URL here to point to your backend
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "https://fixture-api-6ds7q1-0d111f-31-97-133-67.traefik.me/api";
 
 /**
  * Helper function to make API calls

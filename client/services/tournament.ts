@@ -4,6 +4,7 @@ import {
   Bracket,
   Match,
   TournamentData,
+  TournamentListItem,
   CreateTournamentRequest,
   UpdateMatchRequest,
 } from "@shared/api";
@@ -24,6 +25,13 @@ export async function createTournament(
 }
 
 /**
+ * List all tournaments
+ */
+export async function getTournaments(): Promise<TournamentListItem[]> {
+  return apiCall<TournamentListItem[]>("/tournaments");
+}
+
+/**
  * Get a tournament by ID
  */
 export async function getTournament(id: string): Promise<TournamentData> {
@@ -31,7 +39,7 @@ export async function getTournament(id: string): Promise<TournamentData> {
 }
 
 /**
- * List all tournaments
+ * List all tournaments (deprecated, use getTournaments instead)
  */
 export async function listTournaments(): Promise<TournamentData[]> {
   return apiCall<TournamentData[]>("/tournaments");
