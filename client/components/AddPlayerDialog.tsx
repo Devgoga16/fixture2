@@ -22,11 +22,15 @@ interface AddPlayerDialogProps {
 }
 
 interface DNIResponse {
-  nombre: string;
-  numeroDocumento: string;
+  fullName: string;
+  dni: string;
+  firstName: string;
+  lastName: string;
   apellidoPaterno: string;
   apellidoMaterno: string;
   nombres: string;
+  tipoDocumento: string;
+  raw: any;
 }
 
 export function AddPlayerDialog({
@@ -54,18 +58,10 @@ export function AddPlayerDialog({
 
     try {
       setIsSearching(true);
-      const response = await fetch(
-        `/api/dni/search?numero=${dni}`
-      );
-
-      if (!response.ok) {
-        throw new Error("No se pudo consultar el DNI");
-      }
-
-      const data: DNIResponse = await response.json();
+      const data = await searchDNI(dni);
       
-      // Construir nombre completo
-      const fullNameValue = `${data.apellidoPaterno} ${data.apellidoMaterno} ${data.nombres}`.trim();
+      // Usar fullName directamente o construir desde los campos
+      const fullNameValue = data.fullName || `${data.apellidoPaterno} ${data.apellidoMaterno} ${data.nombres}`.trim();
       setFullName(fullNameValue);
       setDniFound(true);
 

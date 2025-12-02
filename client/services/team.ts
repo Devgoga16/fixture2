@@ -22,25 +22,18 @@ export async function addPlayers(
 }
 
 /**
- * Search DNI information directly from APIs.net.pe
+ * Search DNI information
  */
-export async function searchDNI(numero: string): Promise<{
-  nombre: string;
-  numeroDocumento: string;
+export async function searchDNI(dni: string): Promise<{
+  fullName: string;
+  dni: string;
+  firstName: string;
+  lastName: string;
   apellidoPaterno: string;
   apellidoMaterno: string;
   nombres: string;
+  tipoDocumento: string;
+  raw: any;
 }> {
-  const response = await fetch(`https://api.apis.net.pe/v1/dni?numero=${numero}`, {
-    headers: {
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${import.meta.env.VITE_DNI_API_TOKEN}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('No se pudo consultar el DNI');
-  }
-
-  return response.json();
+  return apiCall(`/dni/${dni}`);
 }

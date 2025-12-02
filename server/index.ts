@@ -20,7 +20,7 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  app.get("/api/dni/search", searchDNI);
+  app.get("/api/dni/:dni", searchDNI);
 
   return app;
 }
