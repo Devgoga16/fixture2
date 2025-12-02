@@ -19,7 +19,7 @@ export const searchDNI: RequestHandler = async (req, res) => {
       {
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${process.env.DNI_API_TOKEN}`,
+          Authorization: "Bearer apis-token-3781",
         },
       }
     );

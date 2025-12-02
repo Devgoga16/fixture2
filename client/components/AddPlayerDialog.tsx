@@ -54,7 +54,15 @@ export function AddPlayerDialog({
 
     try {
       setIsSearching(true);
-      const data = await searchDNI(dni);
+      const response = await fetch(
+        `/api/dni/search?numero=${dni}`
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo consultar el DNI");
+      }
+
+      const data: DNIResponse = await response.json();
       
       // Construir nombre completo
       const fullNameValue = `${data.apellidoPaterno} ${data.apellidoMaterno} ${data.nombres}`.trim();
