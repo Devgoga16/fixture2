@@ -108,26 +108,26 @@ export function TournamentSelector() {
       </div>
 
       <div className="max-w-7xl w-full relative z-10">
-        {/* Action Buttons - Top Right */}
+        {/* Action Buttons - Top Right on Desktop, Below Logo on Mobile */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
-          className="absolute top-4 right-4 flex gap-3"
+          className="flex flex-row gap-2 sm:gap-3 mb-8 sm:mb-0 sm:absolute sm:top-4 sm:right-4 justify-center sm:justify-start"
         >
           <Button
             onClick={() => navigate("/organizer-login")}
-            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex-1 sm:flex-none text-xs sm:text-sm"
           >
-            <Crown className="mr-2 h-4 w-4" />
-            Soy Organizador
+            <Crown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Soy </span>Organizador
           </Button>
           <Button
             onClick={() => navigate("/delegate-login")}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex-1 sm:flex-none text-xs sm:text-sm"
           >
-            <Shield className="mr-2 h-4 w-4" />
-            Soy Delegado
+            <Shield className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Soy </span>Delegado
           </Button>
         </motion.div>
 
@@ -136,7 +136,7 @@ export function TournamentSelector() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20 pt-10"
+          className="text-center mb-20 pt-10 sm:pt-10"
         >
           <div className="inline-block mb-8 relative group">
             <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/30 transition-all duration-500"></div>
