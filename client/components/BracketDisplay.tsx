@@ -77,6 +77,7 @@ export function BracketDisplay({ bracket, onMatchClick, isAdminMode = true }: Br
                       key={match.id}
                       match={match}
                       onClick={() => onMatchClick(match)}
+                      isAdminMode={isAdminMode}
                     />
                   ))}
                 </div>
@@ -92,9 +93,10 @@ export function BracketDisplay({ bracket, onMatchClick, isAdminMode = true }: Br
 interface MatchCardProps {
   match: Match;
   onClick: () => void;
+  isAdminMode?: boolean;
 }
 
-function MatchCard({ match, onClick }: MatchCardProps) {
+function MatchCard({ match, onClick, isAdminMode = true }: MatchCardProps) {
   const isComplete = match.completed;
   const canPlay = match.team1 && match.team2 && !isComplete;
   const isPending = !match.team1 || !match.team2;
@@ -212,7 +214,7 @@ function MatchCard({ match, onClick }: MatchCardProps) {
         </div>
 
         {/* Action hint */}
-        {canPlay && (
+        {canPlay && isAdminMode && (
           <div className="mt-3 pt-3 border-t border-blue-200">
             <p className="text-xs text-center font-medium text-blue-600">
               Toca para ingresar resultado
