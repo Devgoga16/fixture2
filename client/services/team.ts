@@ -1,6 +1,43 @@
 import { apiCall } from "@/config/api";
 import { TeamPlayersResponse } from "@shared/api";
 
+export interface DelegateTeamsResponse {
+  success: boolean;
+  delegado: {
+    phone: string;
+    name: string;
+  };
+  totalTeams: number;
+  teams: Array<{
+    id: string;
+    name: string;
+    position: number;
+    delegadoNombre: string;
+    delegadoTelefono: string;
+    tournament: {
+      id: string;
+      name: string;
+      status: string;
+    };
+    players: Array<{
+      id: string;
+      fullName: string;
+      dni: string;
+      createdAt: string;
+    }>;
+    playersCount: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+}
+
+/**
+ * Get delegate teams
+ */
+export async function getDelegateTeams(phone: string): Promise<DelegateTeamsResponse> {
+  return apiCall<DelegateTeamsResponse>(`/delegado/teams?phone=${phone}`);
+}
+
 /**
  * Get team players
  */

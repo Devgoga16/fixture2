@@ -4,7 +4,7 @@ import { getTournaments } from "@/services/tournament";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trophy, Calendar, Users, ArrowRight } from "lucide-react";
+import { Loader2, Trophy, Calendar, Users, ArrowRight, Shield, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -108,6 +108,29 @@ export function TournamentSelector() {
       </div>
 
       <div className="max-w-7xl w-full relative z-10">
+        {/* Action Buttons - Top Right */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="absolute top-4 right-4 flex gap-3"
+        >
+          <Button
+            onClick={() => navigate("/organizer-login")}
+            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Crown className="mr-2 h-4 w-4" />
+            Soy Organizador
+          </Button>
+          <Button
+            onClick={() => navigate("/delegate-login")}
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Shield className="mr-2 h-4 w-4" />
+            Soy Delegado
+          </Button>
+        </motion.div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -140,7 +163,7 @@ export function TournamentSelector() {
           </h1>
 
           <p className="text-xl md:text-2xl text-slate-500 font-light tracking-widest uppercase">
-            Fixture Oficial 2024
+            Fixture Oficial 2025
           </p>
         </motion.div>
 

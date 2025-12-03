@@ -25,6 +25,9 @@
     "noFallthroughCasesInSwitch": false,
     "strictNullChecks": false,
 
+    /* Suppress deprecation warnings */
+    "ignoreDeprecations": "6.0",
+
     /* Path mapping */
     "baseUrl": ".",
     "paths": {

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Team, Bracket } from "@/lib/tournament";
 import { TournamentSetup } from "@/components/TournamentSetup";
 import { TournamentDashboard } from "@/components/TournamentDashboard";
 import type { TournamentData } from "@/services/tournament";
 import { getTournament } from "@/services/tournament";
+import { isOrganizer } from "@/services/auth";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 export default function TournamentView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [tournament, setTournament] = useState<{
     teams: Team[];
     size: number;
@@ -20,6 +22,9 @@ export default function TournamentView() {
   } | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [error, setError] = useState<string | null>(null);
+
+  // Determinar si está en modo edición (solo organizadores pueden editar)
+  const isEditMode = isOrganizer();
 
   useEffect(() => {
     if (id) {
@@ -105,6 +110,7 @@ export default function TournamentView() {
       bracket={tournament.bracket}
       onBracketUpdate={handleBracketUpdate}
       onReset={handleReset}
+      isEditMode={isEditMode}
     />
   );
 }

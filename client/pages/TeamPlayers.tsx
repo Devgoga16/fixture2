@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Users, Loader2, User, UserPlus } from "lucide-react";
 import { AddPlayerDialog } from "@/components/AddPlayerDialog";
 import { getTeamPlayers } from "@/services/team";
+import { isOrganizer } from "@/services/auth";
 
 export function TeamPlayers() {
   const { teamId } = useParams<{ teamId: string }>();
@@ -15,6 +16,7 @@ export function TeamPlayers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addPlayerDialogOpen, setAddPlayerDialogOpen] = useState(false);
+  const canEdit = isOrganizer();
 
   useEffect(() => {
     loadPlayers();
@@ -131,13 +133,15 @@ export function TeamPlayers() {
                   Lista completa de jugadores del equipo
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => setAddPlayerDialogOpen(true)}
-                className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-              >
-                <UserPlus className="w-4 h-4" />
-                Agregar Jugador
-              </Button>
+              {canEdit && (
+                <Button
+                  onClick={() => setAddPlayerDialogOpen(true)}
+                  className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Agregar Jugador
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-6">

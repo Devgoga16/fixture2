@@ -7,6 +7,7 @@ import {
 } from "@/lib/tournament";
 import { BracketDisplay } from "./BracketDisplay";
 import { MatchResultDialog } from "./MatchResultDialog";
+import { MatchNotificationDialog } from "./MatchNotificationDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RotateCcw, Trophy, Users, Loader, Home, Activity, Calendar, Award, Lock, Unlock, Eye } from "lucide-react";
@@ -14,6 +15,7 @@ import { updateMatchResult as updateMatchResultAPI, resetTournament } from "@/se
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { isAuthenticated } from "@/services/auth";
 
 interface TournamentDashboardProps {
   teams: Team[];
@@ -22,6 +24,7 @@ interface TournamentDashboardProps {
   bracket: Bracket;
   onBracketUpdate: (bracket: Bracket) => void;
   onReset: () => void;
+  isEditMode?: boolean;
 }
 
 export function TournamentDashboard({
@@ -31,24 +34,20 @@ export function TournamentDashboard({
   bracket: initialBracket,
   onBracketUpdate,
   onReset,
+  isEditMode = false,
 }: TournamentDashboardProps) {
   const [bracket, setBracket] = useState<Bracket>(initialBracket);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleMatchClick = (match: Match) => {
-    // Only allow editing in admin mode
-    if (!isAdminMode) {
-      toast({
-        title: "Modo lectura",
-        description: "Activa el modo administrador para editar resultados",
-        variant: "default",
-      });
+    // Only allow editing in edit mode
+    if (!isEditMode) {
       return;
     }
 
@@ -166,55 +165,29 @@ export function TournamentDashboard({
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Admin Mode Toggle */}
-                <Button
-                  onClick={() => setIsAdminMode(!isAdminMode)}
-                  variant={isAdminMode ? "default" : "outline"}
-                  size="sm"
-                  className={`gap-2 ${isAdminMode
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                      : "text-slate-600 hover:text-blue-600 hover:border-blue-400"
-                    }`}
-                >
-                  {isAdminMode ? (
-                    <>
-                      <Unlock className="w-4 h-4" />
-                      <span className="hidden sm:inline">Admin</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4" />
-                      <span className="hidden sm:inline">Lectura</span>
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  onClick={() => navigate("/")}
-                  variant="ghost"
-                  size="sm"
-                  className="text-slate-600 hover:text-blue-600"
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  Inicio
-                </Button>
+                {isEditMode ? (
+                  <Button
+                    onClick={() => navigate("/organizer-dashboard")}
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-600 hover:text-blue-600"
+                  >
+                    <Home className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => navigate("/")}
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-600 hover:text-blue-600"
+                  >
+                    <Home className="w-4 h-4 mr-2" />
+                    Inicio
+                  </Button>
+                )}
               </div>
             </div>
-
-            {/* Mode indicator banner */}
-            {isAdminMode && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="mt-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg"
-              >
-                <p className="text-xs text-blue-700 flex items-center gap-2">
-                  <Unlock className="w-3 h-3" />
-                  <span className="font-semibold">Modo Administrador:</span>
-                  <span>Puedes editar resultados y gestionar el torneo</span>
-                </p>
-              </motion.div>
-            )}
 
             {/* Champion */}
             {champion && (
@@ -270,7 +243,7 @@ export function TournamentDashboard({
             <h2 className="text-lg font-bold text-slate-900">
               Fixture
             </h2>
-            {!isAdminMode && (
+            {!isEditMode && (
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <Lock className="w-3 h-3" />
                 <span>Solo lectura</span>
@@ -281,7 +254,7 @@ export function TournamentDashboard({
             <BracketDisplay
               bracket={bracket}
               onMatchClick={handleMatchClick}
-              isAdminMode={isAdminMode}
+              isAdminMode={isEditMode}
             />
           </div>
         </Card>
@@ -308,14 +281,16 @@ export function TournamentDashboard({
                       {team.name}
                     </span>
                   </div>
-                  <Button
-                    onClick={() => navigate(`/team/${team.id}/players`)}
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex-shrink-0"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
+                  {isAuthenticated() && (
+                    <Button
+                      onClick={() => navigate(`/team/${team.id}/players`)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex-shrink-0"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -328,7 +303,20 @@ export function TournamentDashboard({
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onSave={handleSaveResult}
+        onOpenNotifications={() => {
+          setDialogOpen(false);
+          setNotificationDialogOpen(true);
+        }}
         isSaving={isSaving}
+      />
+
+      <MatchNotificationDialog
+        match={selectedMatch}
+        open={notificationDialogOpen}
+        onClose={() => {
+          setNotificationDialogOpen(false);
+          setDialogOpen(true);
+        }}
       />
 
       {/* Footer */}

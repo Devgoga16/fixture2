@@ -10,13 +10,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, Trophy } from "lucide-react";
+import { Loader2, Trophy, Bell, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface MatchResultDialogProps {
   match: Match | null;
   open: boolean;
   onClose: () => void;
   onSave: (score1: number, score2: number) => Promise<void>;
+  onOpenNotifications?: () => void;
   isSaving?: boolean;
 }
 
@@ -25,10 +27,12 @@ export function MatchResultDialog({
   open,
   onClose,
   onSave,
+  onOpenNotifications,
   isSaving = false,
 }: MatchResultDialogProps) {
   const [score1, setScore1] = useState<string>("");
   const [score2, setScore2] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (match) {
@@ -43,6 +47,11 @@ export function MatchResultDialog({
     await onSave(s1, s2);
   };
 
+  const handleViewTeam = (teamId: string) => {
+    onClose();
+    navigate(`/team/${teamId}/players`);
+  };
+
   if (!match) return null;
 
   return (
@@ -52,15 +61,37 @@ export function MatchResultDialog({
           <DialogTitle className="text-xl font-bold text-center text-slate-800">Ingresa el Resultado</DialogTitle>
         </DialogHeader>
 
+        {onOpenNotifications && (
+          <div className="pb-2">
+            <Button
+              onClick={onOpenNotifications}
+              variant="outline"
+              className="w-full gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+              disabled={isSaving}
+            >
+              <Bell className="w-4 h-4" />
+              Enviar Notificaciones
+            </Button>
+          </div>
+        )}
+
         <div className="space-y-6 py-6">
           {/* Team 1 */}
-          <Card className="p-4 border-0 bg-blue-50 shadow-sm">
+          <Card className="p-4 border-0 bg-blue-50 shadow-sm group cursor-pointer hover:bg-blue-100 transition-colors">
             <div className="flex items-center gap-4">
-              <div className="flex-1">
+              <div 
+                className="flex-1"
+                onClick={() => match.team1 && handleViewTeam(match.team1.id)}
+              >
                 <p className="text-sm text-slate-500 mb-2">Equipo 1</p>
-                <p className="font-bold text-lg text-slate-900">
-                  {match.team1?.name || "Por definir"}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-lg text-slate-900">
+                    {match.team1?.name || "Por definir"}
+                  </p>
+                  {match.team1 && (
+                    <Users className="w-4 h-4 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
               </div>
               <Input
                 type="number"
@@ -81,13 +112,21 @@ export function MatchResultDialog({
           </div>
 
           {/* Team 2 */}
-          <Card className="p-4 border-0 bg-indigo-50 shadow-sm">
+          <Card className="p-4 border-0 bg-indigo-50 shadow-sm group cursor-pointer hover:bg-indigo-100 transition-colors">
             <div className="flex items-center gap-4">
-              <div className="flex-1">
+              <div 
+                className="flex-1"
+                onClick={() => match.team2 && handleViewTeam(match.team2.id)}
+              >
                 <p className="text-sm text-slate-500 mb-2">Equipo 2</p>
-                <p className="font-bold text-lg text-slate-900">
-                  {match.team2?.name || "Por definir"}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-lg text-slate-900">
+                    {match.team2?.name || "Por definir"}
+                  </p>
+                  {match.team2 && (
+                    <Users className="w-4 h-4 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
               </div>
               <Input
                 type="number"

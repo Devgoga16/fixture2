@@ -23,7 +23,7 @@ export async function apiCall<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `API Error: ${response.status}`);
+    throw new Error(error.error || error.message || `API Error: ${response.status}`);
   }
 
   return response.json();

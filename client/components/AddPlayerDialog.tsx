@@ -44,6 +44,7 @@ export function AddPlayerDialog({
   const [isSearching, setIsSearching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [dniFound, setDniFound] = useState(false);
+  const [manualEntry, setManualEntry] = useState(false);
   const { toast } = useToast();
 
   const handleSearchDNI = async () => {
@@ -62,7 +63,7 @@ export function AddPlayerDialog({
       
       // Usar fullName directamente o construir desde los campos
       const fullNameValue = data.fullName || `${data.apellidoPaterno} ${data.apellidoMaterno} ${data.nombres}`.trim();
-      setFullName(fullNameValue);
+      setFullName(fullNameValue.toUpperCase());
       setDniFound(true);
 
       toast({
@@ -70,16 +71,17 @@ export function AddPlayerDialog({
         description: "Datos obtenidos correctamente",
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "No se pudo consultar el DNI";
+      
       toast({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "No se pudo consultar el DNI",
+        title: "DNI no encontrado",
+        description: errorMessage + ". Puedes escribir el nombre manualmente.",
         variant: "destructive",
       });
+      
       setFullName("");
       setDniFound(false);
+      setManualEntry(true); // Habilitar entrada manual cuando falla la búsqueda
     } finally {
       setIsSearching(false);
     }
@@ -108,6 +110,7 @@ export function AddPlayerDialog({
       setDni("");
       setFullName("");
       setDniFound(false);
+      setManualEntry(false);
       onPlayerAdded();
       onClose();
     } catch (error) {
@@ -123,11 +126,11 @@ export function AddPlayerDialog({
       setIsSaving(false);
     }
   };
-
   const handleClose = () => {
     setDni("");
     setFullName("");
     setDniFound(false);
+    setManualEntry(false);
     onClose();
   };
 
@@ -158,6 +161,7 @@ export function AddPlayerDialog({
                   const value = e.target.value.replace(/\D/g, "").slice(0, 8);
                   setDni(value);
                   setDniFound(false);
+                  setManualEntry(false);
                   setFullName("");
                 }}
                 maxLength={8}
@@ -196,13 +200,15 @@ export function AddPlayerDialog({
               type="text"
               placeholder="Nombre completo del jugador"
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              disabled={!dniFound || isSaving}
-              className={dniFound ? "bg-green-50" : ""}
+              onChange={(e) => setFullName(e.target.value.toUpperCase())}
+              disabled={(!dniFound && !manualEntry) || isSaving}
+              className={dniFound ? "bg-green-50" : manualEntry ? "bg-yellow-50" : ""}
             />
             <p className="text-xs text-slate-500">
               {dniFound
                 ? "Datos obtenidos automáticamente"
+                : manualEntry
+                ? "Escribe el nombre manualmente"
                 : "Busca el DNI primero para obtener el nombre"}
             </p>
           </div>
