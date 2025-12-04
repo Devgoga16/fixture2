@@ -74,3 +74,33 @@ export async function searchDNI(dni: string): Promise<{
 }> {
   return apiCall(`/dni/${dni}`);
 }
+
+/**
+ * Update team delegado
+ */
+export async function updateTeamDelegado(
+  teamId: string,
+  delegadoNombre: string,
+  delegadoTelefono: string
+): Promise<{
+  success: boolean;
+  message: string;
+  team: {
+    id: string;
+    name: string;
+    delegado: {
+      nombre: string;
+      telefono: string;
+    };
+    tournament: {
+      id: string;
+      name: string;
+    };
+    updatedAt: string;
+  };
+}> {
+  return apiCall(`/teams/${teamId}/delegado`, {
+    method: "PUT",
+    body: JSON.stringify({ delegadoNombre, delegadoTelefono }),
+  });
+}

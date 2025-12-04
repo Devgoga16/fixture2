@@ -87,8 +87,22 @@ export interface Player {
 }
 
 export interface TeamPlayersResponse {
-  teamId: string;
-  teamName: string;
+  team: {
+    id: string;
+    name: string;
+    position: number;
+    delegado: {
+      nombre: string | null;
+      telefono: string | null;
+    };
+    tournament: {
+      id: string;
+      name: string;
+      status: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+  };
   players: Player[];
   totalPlayers: number;
 }

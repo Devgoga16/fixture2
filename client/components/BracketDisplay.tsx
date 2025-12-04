@@ -223,10 +223,13 @@ function MatchCard({ match, onClick, isAdminMode = true }: MatchCardProps) {
                   {match.team1.name}
                 </p>
               </div>
-              {isComplete && (
-                <span className={`font-black text-xl ml-2 ${match.winner?.id === match.team1.id
-                  ? "text-emerald-700"
-                  : "text-slate-400"
+              {(isComplete || match.status === "in_progress") && match.score1 !== null && match.score1 !== undefined && (
+                <span className={`font-black text-xl ml-2 ${
+                  match.status === "in_progress"
+                    ? "text-orange-600"
+                    : match.winner?.id === match.team1.id
+                    ? "text-emerald-700"
+                    : "text-slate-400"
                   }`}>
                   {match.score1}
                 </span>
@@ -264,10 +267,13 @@ function MatchCard({ match, onClick, isAdminMode = true }: MatchCardProps) {
                   {match.team2.name}
                 </p>
               </div>
-              {isComplete && (
-                <span className={`font-black text-xl ml-2 ${match.winner?.id === match.team2.id
-                  ? "text-emerald-700"
-                  : "text-slate-400"
+              {(isComplete || match.status === "in_progress") && match.score2 !== null && match.score2 !== undefined && (
+                <span className={`font-black text-xl ml-2 ${
+                  match.status === "in_progress"
+                    ? "text-orange-600"
+                    : match.winner?.id === match.team2.id
+                    ? "text-emerald-700"
+                    : "text-slate-400"
                   }`}>
                   {match.score2}
                 </span>

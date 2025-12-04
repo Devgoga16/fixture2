@@ -52,8 +52,8 @@ export function TournamentDashboard({
     }
 
     if (match.team1 && match.team2) {
-      setSelectedMatch(match);
-      setDialogOpen(true);
+      // Navigate to manage match page for organizers
+      navigate(`/tournament/${tournamentId}/match/${match.id}`);
     }
   };
 

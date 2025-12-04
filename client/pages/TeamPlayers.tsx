@@ -4,18 +4,34 @@ import { TeamPlayersResponse } from "@shared/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Loader2, User, UserPlus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowLeft, Users, Loader2, User, UserPlus, Phone, UserCircle, Edit, Plus } from "lucide-react";
 import { AddPlayerDialog } from "@/components/AddPlayerDialog";
-import { getTeamPlayers } from "@/services/team";
+import { getTeamPlayers, updateTeamDelegado } from "@/services/team";
 import { isOrganizer } from "@/services/auth";
+import { useToast } from "@/hooks/use-toast";
 
 export function TeamPlayers() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [data, setData] = useState<TeamPlayersResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addPlayerDialogOpen, setAddPlayerDialogOpen] = useState(false);
+  const [delegadoDialogOpen, setDelegadoDialogOpen] = useState(false);
+  const [delegadoNombre, setDelegadoNombre] = useState("");
+  const [delegadoTelefono, setDelegadoTelefono] = useState("");
+  const [savingDelegado, setSavingDelegado] = useState(false);
   const canEdit = isOrganizer();
 
   useEffect(() => {
@@ -34,6 +50,37 @@ export function TeamPlayers() {
       setError(err instanceof Error ? err.message : "Error al cargar los jugadores");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenDelegadoDialog = () => {
+    if (data?.team.delegado) {
+      setDelegadoNombre(data.team.delegado.nombre || "");
+      setDelegadoTelefono(data.team.delegado.telefono || "");
+    }
+    setDelegadoDialogOpen(true);
+  };
+
+  const handleSaveDelegado = async () => {
+    if (!teamId) return;
+
+    try {
+      setSavingDelegado(true);
+      await updateTeamDelegado(teamId, delegadoNombre, delegadoTelefono);
+      toast({
+        title: "Delegado actualizado",
+        description: "La información del delegado se ha guardado correctamente",
+      });
+      setDelegadoDialogOpen(false);
+      await loadPlayers();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "No se pudo guardar la información",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingDelegado(false);
     }
   };
 
@@ -109,7 +156,7 @@ export function TeamPlayers() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-                  {data.teamName}
+                  {data.team.name}
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="secondary" className="text-xs">
@@ -124,6 +171,63 @@ export function TeamPlayers() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 relative z-10">
+        {/* Delegado Card */}
+        <Card className="border border-slate-200/60 shadow-md overflow-hidden bg-white/80 backdrop-blur-sm mb-6">
+          <CardHeader className="bg-white/60 border-b border-slate-200/60">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <UserCircle className="w-5 h-5 text-indigo-600" />
+                Delegado
+              </CardTitle>
+              {canEdit && (
+                <Button
+                  onClick={handleOpenDelegadoDialog}
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {data.team.delegado.nombre ? (
+                    <>
+                      <Edit className="w-4 h-4" />
+                      Editar
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      Agregar
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            {data.team.delegado.nombre ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <UserCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">{data.team.delegado.nombre}</p>
+                    {data.team.delegado.telefono && (
+                      <div className="flex items-center gap-1.5 text-sm text-slate-600 mt-1">
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>{data.team.delegado.telefono}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <UserCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">Sin delegado asignado</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="border border-slate-200/60 shadow-md overflow-hidden bg-white/80 backdrop-blur-sm">
           <CardHeader className="bg-white/60 border-b border-slate-200/60">
             <div className="flex items-center justify-between">
@@ -197,6 +301,62 @@ export function TeamPlayers() {
           onPlayerAdded={loadPlayers}
         />
       )}
+
+      {/* Edit Delegado Dialog */}
+      <Dialog open={delegadoDialogOpen} onOpenChange={setDelegadoDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {data?.team.delegado.nombre ? "Editar Delegado" : "Agregar Delegado"}
+            </DialogTitle>
+            <DialogDescription>
+              Ingresa los datos del delegado del equipo
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="nombre">Nombre completo</Label>
+              <Input
+                id="nombre"
+                placeholder="Ej: Juan Pérez"
+                value={delegadoNombre}
+                onChange={(e) => setDelegadoNombre(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="telefono">Teléfono (opcional)</Label>
+              <Input
+                id="telefono"
+                placeholder="Ej: 987654321"
+                value={delegadoTelefono}
+                onChange={(e) => setDelegadoTelefono(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDelegadoDialogOpen(false)}
+              disabled={savingDelegado}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveDelegado}
+              disabled={savingDelegado || !delegadoNombre.trim()}
+            >
+              {savingDelegado ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                "Guardar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

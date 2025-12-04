@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import TournamentView from "./pages/TournamentView";
 import { TeamPlayers } from "./pages/TeamPlayers";
+import ManageMatch from "./pages/ManageMatch";
 import DelegateLogin from "./pages/DelegateLogin";
 import DelegateDashboard from "./pages/DelegateDashboard";
 import OrganizerLogin from "./pages/OrganizerLogin";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/new" element={<TournamentView />} />
           <Route path="/tournament/:id" element={<TournamentView />} />
+          <Route path="/tournament/:tournamentId/match/:matchId" element={<ManageMatch />} />
           <Route path="/team/:teamId/players" element={<TeamPlayers />} />
           <Route path="/delegate-login" element={<DelegateLogin />} />
           <Route path="/delegate-dashboard" element={<DelegateDashboard />} />
