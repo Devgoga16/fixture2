@@ -29,6 +29,8 @@ export interface Match {
   score2: number | null;
   winner: Team | null;
   completed: boolean;
+  status: "created" | "scheduled" | "in_progress" | "completed";
+  scheduledTime: string | null;
 }
 
 export interface Bracket {

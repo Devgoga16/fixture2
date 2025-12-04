@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bracket, Match, getRoundName } from "@/lib/tournament";
 import { Card } from "@/components/ui/card";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, Clock, Calendar } from "lucide-react";
 
 interface BracketDisplayProps {
   bracket: Bracket;
@@ -100,6 +100,75 @@ function MatchCard({ match, onClick, isAdminMode = true }: MatchCardProps) {
   const isComplete = match.completed;
   const canPlay = match.team1 && match.team2 && !isComplete;
   const isPending = !match.team1 || !match.team2;
+  const isScheduled = match.status === "scheduled" && match.scheduledTime;
+
+  const formatScheduledTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getUTCDate();
+    const month = date.toLocaleString("es-ES", { month: "short", timeZone: "UTC" });
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12; // Convierte 0 a 12 para formato 12 horas
+    return `${month} ${day}, ${hours}:${minutes} ${ampm}`;
+  };
+
+  const getStatusInfo = () => {
+    if (isComplete) {
+      return {
+        color: "emerald",
+        bgColor: "bg-emerald-100",
+        textColor: "text-emerald-700",
+        dotColor: "bg-emerald-500",
+        label: "Finalizado",
+        showPulse: false,
+      };
+    }
+    
+    if (match.status === "in_progress") {
+      return {
+        color: "orange",
+        bgColor: "bg-orange-100",
+        textColor: "text-orange-700",
+        dotColor: "bg-orange-500",
+        label: "En Juego",
+        showPulse: true,
+      };
+    }
+    
+    if (match.status === "scheduled") {
+      return {
+        color: "purple",
+        bgColor: "bg-purple-100",
+        textColor: "text-purple-700",
+        dotColor: "bg-purple-500",
+        label: "Programado",
+        showPulse: false,
+      };
+    }
+    
+    if (canPlay) {
+      return {
+        color: "blue",
+        bgColor: "bg-blue-100",
+        textColor: "text-blue-700",
+        dotColor: "bg-blue-500",
+        label: "Pendiente",
+        showPulse: true,
+      };
+    }
+    
+    return {
+      color: "slate",
+      bgColor: "bg-slate-100",
+      textColor: "text-slate-500",
+      dotColor: "bg-slate-400",
+      label: "Esperando",
+      showPulse: false,
+    };
+  };
+
+  const statusInfo = getStatusInfo();
 
   return (
     <Card
@@ -115,28 +184,26 @@ function MatchCard({ match, onClick, isAdminMode = true }: MatchCardProps) {
         {/* Match Status Badge */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            {isComplete ? (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-100 rounded-md">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                <span className="text-xs font-bold text-emerald-700">Finalizado</span>
-              </div>
-            ) : canPlay ? (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-100 rounded-md">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-xs font-bold text-blue-700">Pendiente</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-md">
-                <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
-                <span className="text-xs font-bold text-slate-500">Esperando</span>
-              </div>
-            )}
+            <div className={`flex items-center gap-1.5 px-2 py-1 ${statusInfo.bgColor} rounded-md`}>
+              <div className={`w-2 h-2 ${statusInfo.dotColor} rounded-full ${statusInfo.showPulse ? 'animate-pulse' : ''}`}></div>
+              <span className={`text-xs font-bold ${statusInfo.textColor}`}>{statusInfo.label}</span>
+            </div>
           </div>
 
           {canPlay && (
             <ChevronRight className="w-4 h-4 text-blue-500" />
           )}
         </div>
+
+        {/* Scheduled Time */}
+        {isScheduled && (
+          <div className="mb-3 px-2 py-1.5 bg-purple-50 border border-purple-200 rounded-md flex items-center gap-2">
+            <Clock className="w-3.5 h-3.5 text-purple-600" />
+            <span className="text-xs font-medium text-purple-700">
+              {formatScheduledTime(match.scheduledTime!)}
+            </span>
+          </div>
+        )}
 
         {/* Team 1 */}
         <div className={`flex items-center justify-between p-3 rounded-lg mb-2 ${isComplete && match.winner?.id === match.team1?.id

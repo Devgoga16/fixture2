@@ -15,6 +15,8 @@ export interface Match {
   score2: number | null;
   winner: Team | null;
   completed: boolean;
+  status: "created" | "scheduled" | "in_progress" | "completed";
+  scheduledTime: string | null;
 }
 
 export interface Bracket {
@@ -89,6 +91,8 @@ export function generateBracket(teams: Team[]): Bracket {
         score2: null,
         winner: null,
         completed: false,
+        status: "created",
+        scheduledTime: null,
       });
     }
     rounds.push(prelimRound);
@@ -136,6 +140,8 @@ export function generateBracket(teams: Team[]): Bracket {
         score2: null,
         winner: null,
         completed: false,
+        status: "created",
+        scheduledTime: null,
       });
       matchPosition++;
     }
@@ -159,6 +165,8 @@ export function generateBracket(teams: Team[]): Bracket {
           score2: null,
           winner: null,
           completed: false,
+          status: "created",
+          scheduledTime: null,
         });
       }
       rounds.push(round);
@@ -183,6 +191,8 @@ export function generateBracket(teams: Team[]): Bracket {
           score2: null,
           winner: null,
           completed: false,
+          status: "created",
+          scheduledTime: null,
         });
       }
       rounds.push(round);
