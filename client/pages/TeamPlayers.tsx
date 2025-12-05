@@ -14,11 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Users, Loader2, User, UserPlus, Phone, UserCircle, Edit, Plus, Calendar, Clock, Trophy } from "lucide-react";
+import { ArrowLeft, Users, Loader2, User, UserPlus, Phone, UserCircle, Edit, Plus, Calendar, Clock, Trophy, MessageCircle } from "lucide-react";
 import { AddPlayerDialog } from "@/components/AddPlayerDialog";
 import { getTeamPlayers, updateTeamDelegado, getTeamMatches, TeamMatchesResponse } from "@/services/team";
 import { isOrganizer, isDelegate } from "@/services/auth";
 import { useToast } from "@/hooks/use-toast";
+import { apiCall } from "@/config/api";
 
 export function TeamPlayers() {
   const { teamId } = useParams<{ teamId: string }>();
@@ -33,6 +34,7 @@ export function TeamPlayers() {
   const [delegadoNombre, setDelegadoNombre] = useState("");
   const [delegadoTelefono, setDelegadoTelefono] = useState("");
   const [savingDelegado, setSavingDelegado] = useState(false);
+  const [sendingWelcome, setSendingWelcome] = useState(false);
   const canEdit = isOrganizer();
   const isDelegateUser = isDelegate();
 
@@ -97,6 +99,49 @@ export function TeamPlayers() {
       });
     } finally {
       setSavingDelegado(false);
+    }
+  };
+
+  const handleSendWelcome = async () => {
+    if (!data?.team.delegado.telefono) {
+      toast({
+        title: "Error",
+        description: "El delegado no tiene un teléfono registrado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSendingWelcome(true);
+      const response = await apiCall<{
+        success: boolean;
+        message: string;
+        sentTo: {
+          phone: string;
+          name: string;
+          team: string;
+          tournament: string;
+        };
+      }>("/auth/send-welcome-message", {
+        method: "POST",
+        body: JSON.stringify({
+          phone: data.team.delegado.telefono,
+        }),
+      });
+
+      toast({
+        title: "Mensaje enviado",
+        description: `Mensaje de bienvenida enviado a ${response.sentTo.name}`,
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "No se pudo enviar el mensaje",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingWelcome(false);
     }
   };
 
@@ -224,7 +269,7 @@ export function TeamPlayers() {
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                     <UserCircle className="w-6 h-6 text-white" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold text-slate-900">{data.team.delegado.nombre}</p>
                     {data.team.delegado.telefono && (
                       <div className="flex items-center gap-1.5 text-sm text-slate-600 mt-1">
@@ -234,6 +279,27 @@ export function TeamPlayers() {
                     )}
                   </div>
                 </div>
+                {canEdit && data.team.delegado.telefono && (
+                  <Button
+                    onClick={handleSendWelcome}
+                    disabled={sendingWelcome}
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-2"
+                  >
+                    {sendingWelcome ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="w-4 h-4" />
+                        Dar la Bienvenida
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="text-center py-6">
