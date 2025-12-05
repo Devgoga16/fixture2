@@ -29,7 +29,7 @@ export interface Match {
   score2: number | null;
   winner: Team | null;
   completed: boolean;
-  status: "created" | "scheduled" | "in_progress" | "completed";
+  status: "created" | "scheduled" | "in_progress" | "finished";
   scheduledTime: string | null;
 }
 

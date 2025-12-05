@@ -104,3 +104,132 @@ export async function updateTeamDelegado(
     body: JSON.stringify({ delegadoNombre, delegadoTelefono }),
   });
 }
+
+export interface TeamMatch {
+  id: string;
+  tournament: {
+    id: string;
+    name: string;
+    status: string;
+  };
+  round: number;
+  roundName: string;
+  position: number;
+  team1: {
+    id: string;
+    name: string;
+    isMyTeam: boolean;
+  };
+  team2: {
+    id: string;
+    name: string;
+    isMyTeam: boolean;
+  };
+  score1: number | null;
+  score2: number | null;
+  winner: any;
+  goals: any[];
+  yellowCards: any[];
+  status: "created" | "scheduled" | "in_progress" | "finished";
+  scheduledTime: string | null;
+  completed: boolean;
+  result: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMatchesResponse {
+  success: boolean;
+  teamId: string;
+  totalMatches: number;
+  matches: TeamMatch[];
+}
+
+/**
+ * Get team matches for delegates
+ */
+export async function getTeamMatches(teamId: string): Promise<TeamMatchesResponse> {
+  return apiCall<TeamMatchesResponse>(`/matches/team/${teamId}`);
+}
+
+export interface Player {
+  id: string;
+  fullName: string;
+  dni: string;
+  createdAt: string;
+}
+
+export interface GoalRecord {
+  id: string;
+  player: {
+    id: string;
+    fullName: string;
+    dni: string;
+  };
+  createdAt: string;
+}
+
+export interface YellowCardRecord {
+  id: string;
+  player: {
+    id: string;
+    fullName: string;
+    dni: string;
+  };
+  createdAt: string;
+}
+
+export interface TeamDetails {
+  id: string;
+  name: string;
+  position: number;
+  score: number | null;
+  delegado: {
+    nombre: string | null;
+    telefono: string | null;
+  };
+  players: Player[];
+  playersCount: number;
+  goals: GoalRecord[];
+  yellowCards: YellowCardRecord[];
+}
+
+export interface MatchDetailsResponse {
+  success: boolean;
+  match: {
+    id: string;
+    tournament: {
+      id: string;
+      name: string;
+      status: string;
+      totalTeams: number;
+    };
+    round: number;
+    roundName: string;
+    position: number;
+    status: "created" | "scheduled" | "in_progress" | "finished";
+    scheduledTime: string | null;
+    completed: boolean;
+    result: string | null;
+    sport?: number;
+    sets?: Array<{
+      id: string;
+      set: number;
+      score1: number;
+      score2: number;
+      status: "in_progress" | "finished";
+    }>;
+    myTeam: TeamDetails;
+    rivalTeam: TeamDetails;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+/**
+ * Get match details for delegates
+ */
+export async function getMatchDetails(matchId: string, teamId: string): Promise<MatchDetailsResponse> {
+  return apiCall<MatchDetailsResponse>(`/matches/${matchId}/details/${teamId}`);
+}
+

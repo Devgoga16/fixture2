@@ -14,10 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Users, Loader2, User, UserPlus, Phone, UserCircle, Edit, Plus } from "lucide-react";
+import { ArrowLeft, Users, Loader2, User, UserPlus, Phone, UserCircle, Edit, Plus, Calendar, Clock, Trophy } from "lucide-react";
 import { AddPlayerDialog } from "@/components/AddPlayerDialog";
-import { getTeamPlayers, updateTeamDelegado } from "@/services/team";
-import { isOrganizer } from "@/services/auth";
+import { getTeamPlayers, updateTeamDelegado, getTeamMatches, TeamMatchesResponse } from "@/services/team";
+import { isOrganizer, isDelegate } from "@/services/auth";
 import { useToast } from "@/hooks/use-toast";
 
 export function TeamPlayers() {
@@ -25,6 +25,7 @@ export function TeamPlayers() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [data, setData] = useState<TeamPlayersResponse | null>(null);
+  const [matches, setMatches] = useState<TeamMatchesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addPlayerDialogOpen, setAddPlayerDialogOpen] = useState(false);
@@ -33,9 +34,13 @@ export function TeamPlayers() {
   const [delegadoTelefono, setDelegadoTelefono] = useState("");
   const [savingDelegado, setSavingDelegado] = useState(false);
   const canEdit = isOrganizer();
+  const isDelegateUser = isDelegate();
 
   useEffect(() => {
     loadPlayers();
+    if (isDelegateUser) {
+      loadMatches();
+    }
   }, [teamId]);
 
   const loadPlayers = async () => {
@@ -50,6 +55,17 @@ export function TeamPlayers() {
       setError(err instanceof Error ? err.message : "Error al cargar los jugadores");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMatches = async () => {
+    if (!teamId) return;
+
+    try {
+      const matchesData = await getTeamMatches(teamId);
+      setMatches(matchesData);
+    } catch (err) {
+      console.error("Error loading matches:", err);
     }
   };
 
@@ -227,6 +243,98 @@ export function TeamPlayers() {
             )}
           </CardContent>
         </Card>
+
+        {/* Matches Section */}
+        {isDelegateUser && matches && matches.matches.length > 0 && (
+          <Card className="border border-slate-200/60 shadow-md overflow-hidden bg-white/80 backdrop-blur-sm mt-6">
+            <CardHeader className="bg-white/60 border-b border-slate-200/60">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Trophy className="w-5 h-5 text-amber-600" />
+                Partidos del Equipo
+              </CardTitle>
+              <CardDescription>
+                {matches.totalMatches} {matches.totalMatches === 1 ? "partido" : "partidos"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {matches.matches.map((match) => (
+                  <div
+                    key={match.id}
+                    className="p-4 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => navigate(`/match/${match.id}/team/${teamId}`)}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {match.roundName}
+                        </Badge>
+                        {match.status === "in_progress" && (
+                          <Badge className="bg-orange-100 text-orange-700 text-xs">
+                            En Juego
+                          </Badge>
+                        )}
+                        {match.status === "finished" && (
+                          <Badge className="bg-emerald-100 text-emerald-700 text-xs">
+                            Finalizado
+                          </Badge>
+                        )}
+                        {match.status === "scheduled" && (
+                          <Badge className="bg-purple-100 text-purple-700 text-xs">
+                            Programado
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500">{match.tournament.name}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className={`flex-1 text-right ${match.team1?.isMyTeam ? "font-bold" : ""}`}>
+                        <p className="text-sm">{match.team1?.name || "TBD"}</p>
+                      </div>
+                      
+                      <div className="px-6 text-center">
+                        <div className="flex items-center gap-3">
+                          {match.score1 !== null && match.score2 !== null ? (
+                            <>
+                              <span className="text-2xl font-bold text-slate-900">{match.score1}</span>
+                              <span className="text-slate-400">-</span>
+                              <span className="text-2xl font-bold text-slate-900">{match.score2}</span>
+                            </>
+                          ) : (
+                            <span className="text-slate-400 text-sm">vs</span>
+                          )}
+                        </div>
+                        {match.scheduledTime && (
+                          <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                            <Clock className="w-3 h-3" />
+                            <span>
+                              {new Date(match.scheduledTime).toLocaleDateString("es-ES", {
+                                day: "2-digit",
+                                month: "short",
+                                timeZone: "UTC"
+                              })}{" "}
+                              {new Date(match.scheduledTime).toLocaleTimeString("es-ES", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                                timeZone: "UTC"
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={`flex-1 text-left ${match.team2?.isMyTeam ? "font-bold" : ""}`}>
+                        <p className="text-sm">{match.team2?.name || "TBD"}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border border-slate-200/60 shadow-md overflow-hidden bg-white/80 backdrop-blur-sm">
           <CardHeader className="bg-white/60 border-b border-slate-200/60">

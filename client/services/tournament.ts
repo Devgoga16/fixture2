@@ -29,6 +29,34 @@ export interface TeamWithPlayers extends Team {
   playersCount: number;
 }
 
+export interface GoalRecord {
+  id: string;
+  player: {
+    id: string;
+    fullName: string;
+    dni: string;
+  };
+  team: {
+    id: string;
+    name: string;
+  };
+  createdAt: string;
+}
+
+export interface YellowCardRecord {
+  id: string;
+  player: {
+    id: string;
+    fullName: string;
+    dni: string;
+  };
+  team: {
+    id: string;
+    name: string;
+  };
+  createdAt: string;
+}
+
 export interface FullMatchResponse {
   success: boolean;
   match: {
@@ -46,8 +74,18 @@ export interface FullMatchResponse {
     team2: TeamWithPlayers | null;
     score1: number | null;
     score2: number | null;
+    sport?: number; // 1 = Fútbol, 2 = Voley
+    sets?: Array<{ // Para voley
+      id: string;
+      set: number;
+      score1: number;
+      score2: number;
+      status: "in_progress" | "finished";
+    }>;
     winner: Team | null;
-    status: "created" | "scheduled" | "in_progress" | "completed";
+    goals: GoalRecord[];
+    yellowCards: YellowCardRecord[];
+    status: "created" | "scheduled" | "in_progress" | "finished";
     scheduledTime: string | null;
     completed: boolean;
     createdAt: string;
@@ -161,11 +199,16 @@ export async function pauseMatch(matchId: string): Promise<{ success: boolean; m
 export async function updateMatchScore(
   matchId: string,
   score1: number,
-  score2: number
+  score2: number,
+  sets?: Array<{ set: number; score1: number; score2: number }>
 ): Promise<{ success: boolean; match: any }> {
+  const body: any = { score1, score2 };
+  if (sets) {
+    body.sets = sets;
+  }
   return apiCall<{ success: boolean; match: any }>(`/matches/${matchId}/score`, {
     method: "PUT",
-    body: JSON.stringify({ score1, score2 }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -176,11 +219,16 @@ export async function finishMatch(
   tournamentId: string,
   matchId: string,
   score1: number,
-  score2: number
+  score2: number,
+  sets?: Array<{ set: number; score1: number; score2: number }>
 ): Promise<{ success: boolean; match: any; bracket: Bracket }> {
+  const body: any = { score1, score2 };
+  if (sets) {
+    body.sets = sets;
+  }
   return apiCall<{ success: boolean; match: any; bracket: Bracket }>(`/tournaments/${tournamentId}/matches/${matchId}`, {
     method: "PUT",
-    body: JSON.stringify({ score1, score2 }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -197,5 +245,85 @@ export async function updateMatchSchedule(
       status: "scheduled",
       scheduledTime 
     }),
+  });
+}
+
+/**
+ * Save a volleyball set (create or update)
+ */
+export async function saveSet(
+  matchId: string,
+  setData: {
+    set: number;
+    score1: number;
+    score2: number;
+    status: "in_progress" | "finished";
+  }
+): Promise<{ success: boolean; set: any; match: any }> {
+  return apiCall<{ success: boolean; set: any; match: any }>(`/matches/${matchId}/sets`, {
+    method: "POST",
+    body: JSON.stringify(setData),
+  });
+}
+
+/**
+ * Record a goal for a player
+ */
+export async function recordGoal(
+  matchId: string,
+  playerId: string,
+  teamId: string
+): Promise<{
+  success: boolean;
+  message: string;
+  goal: {
+    playerId: {
+      _id: string;
+      fullName: string;
+      dni: string;
+    };
+    teamId: {
+      _id: string;
+      name: string;
+    };
+    _id: string;
+    createdAt: string;
+  };
+  totalGoalsInMatch: number;
+}> {
+  return apiCall(`/matches/${matchId}/goals`, {
+    method: "POST",
+    body: JSON.stringify({ playerId, teamId }),
+  });
+}
+
+/**
+ * Record a yellow card for a player
+ */
+export async function recordYellowCard(
+  matchId: string,
+  playerId: string,
+  teamId: string
+): Promise<{
+  success: boolean;
+  message: string;
+  yellowCard: {
+    playerId: {
+      _id: string;
+      fullName: string;
+      dni: string;
+    };
+    teamId: {
+      _id: string;
+      name: string;
+    };
+    _id: string;
+    createdAt: string;
+  };
+  totalYellowCardsInMatch: number;
+}> {
+  return apiCall(`/matches/${matchId}/yellow-cards`, {
+    method: "POST",
+    body: JSON.stringify({ playerId, teamId }),
   });
 }
