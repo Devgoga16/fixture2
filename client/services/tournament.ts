@@ -16,6 +16,7 @@ export interface Player {
   id: string;
   fullName: string;
   dni: string;
+  camiseta?: number;
   createdAt: string;
 }
 
@@ -325,5 +326,18 @@ export async function recordYellowCard(
   return apiCall(`/matches/${matchId}/yellow-cards`, {
     method: "POST",
     body: JSON.stringify({ playerId, teamId }),
+  });
+}
+
+/**
+ * Update team players jersey numbers
+ */
+export async function updateTeamJerseys(
+  teamId: string,
+  players: Array<{ playerId: string; camiseta: number }>
+): Promise<{ success: boolean; message: string }> {
+  return apiCall(`/teams/${teamId}/players/camisetas`, {
+    method: "PUT",
+    body: JSON.stringify({ players }),
   });
 }

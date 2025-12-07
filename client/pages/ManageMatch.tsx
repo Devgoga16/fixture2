@@ -56,6 +56,7 @@ import {
   recordGoal,
   recordYellowCard,
   saveSet,
+  updateTeamJerseys,
   type FullMatchResponse
 } from "@/services/tournament";
 
@@ -96,6 +97,11 @@ export default function ManageMatch() {
     teamId: string;
     teamName: string;
   } | null>(null);
+
+  // Jersey numbers editing state
+  const [editingJerseysTeam, setEditingJerseysTeam] = useState<string | null>(null);
+  const [jerseyNumbers, setJerseyNumbers] = useState<Record<string, number>>({});
+  const [savingJerseys, setSavingJerseys] = useState(false);
 
   useEffect(() => {
     loadMatchData();
@@ -471,6 +477,42 @@ export default function ManageMatch() {
     });
     
     return { team1Sets, team2Sets };
+  };
+
+  const handleEditJerseys = (teamId: string, players: any[]) => {
+    setEditingJerseysTeam(teamId);
+    const jerseys: Record<string, number> = {};
+    players.forEach(player => {
+      jerseys[player.id] = player.camiseta || 0;
+    });
+    setJerseyNumbers(jerseys);
+  };
+
+  const handleSaveJerseys = async (teamId: string) => {
+    try {
+      setSavingJerseys(true);
+      const players = Object.entries(jerseyNumbers)
+        .filter(([_, camiseta]) => camiseta > 0)
+        .map(([playerId, camiseta]) => ({ playerId, camiseta }));
+      
+      await updateTeamJerseys(teamId, players);
+      
+      toast({
+        title: "Formación actualizada",
+        description: "Los números de camiseta se han guardado correctamente",
+      });
+      
+      setEditingJerseysTeam(null);
+      await loadMatchData(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la formación",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingJerseys(false);
+    }
   };
 
   const formatScheduledTime = (isoString: string): string => {
@@ -1014,11 +1056,53 @@ export default function ManageMatch() {
           {matchData.team1 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-600" />
-                  {matchData.team1.name}
-                </CardTitle>
-                <CardDescription>{team1Players.length} jugadores</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      {matchData.team1.name}
+                    </CardTitle>
+                    <CardDescription>{team1Players.length} jugadores</CardDescription>
+                  </div>
+                  {editingJerseysTeam === matchData.team1.id ? (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingJerseysTeam(null)}
+                        disabled={savingJerseys}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveJerseys(matchData.team1!.id)}
+                        disabled={savingJerseys}
+                      >
+                        {savingJerseys ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4 mr-2" />
+                            Guardar
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEditJerseys(matchData.team1!.id, team1Players)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Actualizar Formación
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {refreshing ? (
@@ -1035,8 +1119,37 @@ export default function ManageMatch() {
                         key={player.id}
                         className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-slate-400">#{idx + 1}</span>
+                        <div className="flex items-center gap-3 flex-1">
+                          {editingJerseysTeam === matchData.team1!.id ? (
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor={`jersey-t1-${player.id}`} className="text-xs text-slate-600 whitespace-nowrap">
+                                #
+                              </Label>
+                              <Input
+                                id={`jersey-t1-${player.id}`}
+                                type="number"
+                                min="0"
+                                max="99"
+                                value={jerseyNumbers[player.id] || ""}
+                                onChange={(e) => setJerseyNumbers({
+                                  ...jerseyNumbers,
+                                  [player.id]: parseInt(e.target.value) || 0
+                                })}
+                                className="w-16 h-8 text-center"
+                                placeholder="0"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              {player.camiseta ? (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                                  #{player.camiseta}
+                                </Badge>
+                              ) : (
+                                <span className="text-sm font-bold text-slate-400">#{idx + 1}</span>
+                              )}
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-slate-900">{player.fullName}</p>
@@ -1059,7 +1172,7 @@ export default function ManageMatch() {
                             <p className="text-xs text-slate-500">DNI: {player.dni}</p>
                           </div>
                         </div>
-                        {matchData.status === "in_progress" && (
+                        {matchData.status === "in_progress" && editingJerseysTeam !== matchData.team1!.id && (
                           <div className="flex items-center gap-2">
                             {matchData.sport === 1 && (
                               <Button
@@ -1100,11 +1213,53 @@ export default function ManageMatch() {
           {matchData.team2 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-indigo-600" />
-                  {matchData.team2.name}
-                </CardTitle>
-                <CardDescription>{team2Players.length} jugadores</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-indigo-600" />
+                      {matchData.team2.name}
+                    </CardTitle>
+                    <CardDescription>{team2Players.length} jugadores</CardDescription>
+                  </div>
+                  {editingJerseysTeam === matchData.team2.id ? (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingJerseysTeam(null)}
+                        disabled={savingJerseys}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveJerseys(matchData.team2!.id)}
+                        disabled={savingJerseys}
+                      >
+                        {savingJerseys ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4 mr-2" />
+                            Guardar
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEditJerseys(matchData.team2!.id, team2Players)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Actualizar Formación
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {refreshing ? (
@@ -1121,8 +1276,37 @@ export default function ManageMatch() {
                         key={player.id}
                         className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-slate-400">#{idx + 1}</span>
+                        <div className="flex items-center gap-3 flex-1">
+                          {editingJerseysTeam === matchData.team2!.id ? (
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor={`jersey-t2-${player.id}`} className="text-xs text-slate-600 whitespace-nowrap">
+                                #
+                              </Label>
+                              <Input
+                                id={`jersey-t2-${player.id}`}
+                                type="number"
+                                min="0"
+                                max="99"
+                                value={jerseyNumbers[player.id] || ""}
+                                onChange={(e) => setJerseyNumbers({
+                                  ...jerseyNumbers,
+                                  [player.id]: parseInt(e.target.value) || 0
+                                })}
+                                className="w-16 h-8 text-center"
+                                placeholder="0"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              {player.camiseta ? (
+                                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-300">
+                                  #{player.camiseta}
+                                </Badge>
+                              ) : (
+                                <span className="text-sm font-bold text-slate-400">#{idx + 1}</span>
+                              )}
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-slate-900">{player.fullName}</p>
@@ -1145,7 +1329,7 @@ export default function ManageMatch() {
                             <p className="text-xs text-slate-500">DNI: {player.dni}</p>
                           </div>
                         </div>
-                        {matchData.status === "in_progress" && (
+                        {matchData.status === "in_progress" && editingJerseysTeam !== matchData.team2!.id && (
                           <div className="flex items-center gap-2">
                             {matchData.sport === 1 && (
                               <Button
