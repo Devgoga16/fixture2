@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,45 @@ import { Loader2, LogIn, ArrowLeft, Crown, Send, Smartphone } from "lucide-react
 import { motion } from "framer-motion";
 import { requestOTP, verifyOTP, saveAuthToken, saveUserData } from "@/services/auth";
 
+// Get version from package.json via import.meta.env or define it here
+const APP_VERSION = "1.0.0"; // Update this manually or use build script
+
 export default function OrganizerLogin() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [debugError, setDebugError] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Capturar errores globales no manejados
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error("[Global Error]", event.error);
+      setDebugError(`GLOBAL ERROR:\n${event.message}\n\nFile: ${event.filename}\nLine: ${event.lineno}:${event.colno}\n\nStack: ${event.error?.stack || "No stack"}`);
+      event.preventDefault();
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error("[Unhandled Promise Rejection]", event.reason);
+      setDebugError(`UNHANDLED PROMISE:\n${event.reason?.message || String(event.reason)}\n\nStack: ${event.reason?.stack || "No stack"}`);
+      event.preventDefault();
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   const handleRequestCode = async () => {
+    setDebugError(""); // Limpiar errores anteriores
+    
     if (!phoneNumber || phoneNumber.length !== 9) {
       toast({
         title: "Número inválido",
@@ -29,24 +58,47 @@ export default function OrganizerLogin() {
     }
 
     try {
+      setDebugError("STEP 1: Iniciando solicitud de código...");
       setIsSendingCode(true);
+      
+      setDebugError("STEP 2: Llamando requestOTP...");
+      console.log("[OTP Request] Solicitando código para:", phoneNumber);
+      
       const response = await requestOTP(phoneNumber);
+      
+      setDebugError("STEP 3: Respuesta recibida correctamente");
+      console.log("[OTP Request] Respuesta recibida:", response);
 
       toast({
         title: "Código enviado",
         description: response.message || `Código enviado al +51 ${phoneNumber} por WhatsApp`,
       });
 
+      setDebugError("STEP 4: Actualizando estado...");
       setCodeSent(true);
+      
+      setDebugError(""); // Limpiar si todo salió bien
+      console.log("[OTP Request] Estado actualizado: codeSent = true");
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : "No stack";
+      const errorName = error instanceof Error ? error.name : typeof error;
+      const fullError = `REQUEST ERROR:\nType: ${errorName}\nMessage: ${errorMsg}\n\nStack:\n${errorStack}`;
+      
+      console.error("[OTP Request] Error completo:", error);
+      console.error("[OTP Request] Error type:", errorName);
+      console.error("[OTP Request] Error constructor:", error?.constructor?.name);
+      
+      setDebugError(fullError);
+      
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "No se pudo enviar el código",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
       setIsSendingCode(false);
+      console.log("[OTP Request] Proceso finalizado");
     }
   };
 
@@ -64,27 +116,45 @@ export default function OrganizerLogin() {
 
     try {
       setIsVerifying(true);
+      setDebugError("");
+      console.log("[OTP Verify] Verificando código:", code.length, "dígitos");
+      console.log("[OTP Verify] Teléfono:", phoneNumber);
+      
       const response = await verifyOTP(phoneNumber, code);
+      console.log("[OTP Verify] Respuesta recibida:", response);
 
       // Guardar token y datos del usuario
+      console.log("[OTP Verify] Guardando token...");
       saveAuthToken(response.token);
+      console.log("[OTP Verify] Token guardado");
+      
+      console.log("[OTP Verify] Guardando datos de usuario...");
       saveUserData(response.user);
+      console.log("[OTP Verify] Datos de usuario guardados:", response.user);
 
       toast({
         title: "Inicio de sesión exitoso",
         description: `Bienvenido, ${response.user.name}`,
       });
 
+      console.log("[OTP Verify] Navegando a dashboard...");
       navigate("/organizer-dashboard");
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : "No stack";
+      const fullError = `VERIFY ERROR:\n${errorMsg}\n\nStack: ${errorStack}`;
+      
+      console.error("[OTP Verify] Error completo:", error);
+      setDebugError(fullError);
+      
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Código incorrecto",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
       setIsVerifying(false);
+      console.log("[OTP Verify] Proceso finalizado");
     }
   };
 
@@ -93,7 +163,33 @@ export default function OrganizerLogin() {
     await handleRequestCode();
   };
 
-  return (
+  // Si hay un error de renderizado catastrófico, mostrar pantalla de error simple
+  if (debugError && debugError.includes("GLOBAL ERROR")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-red-50">
+        <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-red-700 mb-4">Error Fatal Detectado</h1>
+          <div className="bg-red-100 border border-red-300 rounded p-4 mb-4">
+            <pre className="text-xs text-red-800 whitespace-pre-wrap break-words overflow-auto max-h-96">
+              {debugError}
+            </pre>
+          </div>
+          <Button 
+            onClick={() => {
+              setDebugError("");
+              window.location.reload();
+            }}
+            className="w-full"
+          >
+            Recargar Página
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  try {
+    return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-background">
       {/* Background Effects */}
       <div className="absolute inset-0 z-0">
@@ -185,6 +281,24 @@ export default function OrganizerLogin() {
                   )}
                 </Button>
 
+                {debugError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <h4 className="text-sm font-semibold text-red-800 mb-2">Error de Debug:</h4>
+                    <pre className="text-xs text-red-700 whitespace-pre-wrap break-words max-h-48 overflow-y-auto">
+                      {debugError}
+                    </pre>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDebugError("")}
+                      className="mt-2 text-red-600 hover:text-red-700"
+                    >
+                      Cerrar
+                    </Button>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 text-sm text-slate-500 bg-blue-50 p-3 rounded-lg border border-blue-100">
                   <Smartphone className="h-4 w-4 text-blue-600 flex-shrink-0" />
                   <p>
@@ -235,6 +349,24 @@ export default function OrganizerLogin() {
                   )}
                 </Button>
 
+                {debugError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <h4 className="text-sm font-semibold text-red-800 mb-2">Error de Debug:</h4>
+                    <pre className="text-xs text-red-700 whitespace-pre-wrap break-words max-h-48 overflow-y-auto">
+                      {debugError}
+                    </pre>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDebugError("")}
+                      className="mt-2 text-red-600 hover:text-red-700"
+                    >
+                      Cerrar
+                    </Button>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Button
                     type="button"
@@ -272,10 +404,38 @@ export default function OrganizerLogin() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-slate-400 mt-6">
-          Panel exclusivo para organizadores autorizados
-        </p>
+        <div className="text-center space-y-2 mt-6">
+          <p className="text-sm text-slate-400">
+            Panel exclusivo para organizadores autorizados
+          </p>
+          <p className="text-xs text-slate-300">
+            Versión {APP_VERSION}
+          </p>
+        </div>
       </motion.div>
     </div>
-  );
+    );
+  } catch (renderError) {
+    console.error("[Render Error]", renderError);
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-red-50">
+        <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-red-700 mb-4">Error de Renderizado</h1>
+          <div className="bg-red-100 border border-red-300 rounded p-4 mb-4">
+            <pre className="text-xs text-red-800 whitespace-pre-wrap break-words overflow-auto max-h-96">
+              {renderError instanceof Error ? renderError.message : String(renderError)}
+              {"\n\n"}
+              {renderError instanceof Error ? renderError.stack : "No stack"}
+            </pre>
+          </div>
+          <Button 
+            onClick={() => window.location.reload()}
+            className="w-full"
+          >
+            Recargar Página
+          </Button>
+        </div>
+      </div>
+    );
+  }
 }

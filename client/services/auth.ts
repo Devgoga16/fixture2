@@ -54,10 +54,18 @@ export interface DelegateVerifyOTPResponse {
  * Request OTP code to be sent via WhatsApp
  */
 export async function requestOTP(phone: string): Promise<RequestOTPResponse> {
-  return apiCall<RequestOTPResponse>("/auth/request-otp", {
-    method: "POST",
-    body: JSON.stringify({ phone }),
-  });
+  console.log("[API] Enviando request OTP para teléfono:", phone);
+  try {
+    const response = await apiCall<RequestOTPResponse>("/auth/request-otp", {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    });
+    console.log("[API] Respuesta request OTP:", response);
+    return response;
+  } catch (error) {
+    console.error("[API] Error en request OTP:", error);
+    throw error;
+  }
 }
 
 /**
@@ -67,10 +75,19 @@ export async function verifyOTP(
   phone: string,
   otpCode: string
 ): Promise<VerifyOTPResponse> {
-  return apiCall<VerifyOTPResponse>("/auth/verify-otp", {
-    method: "POST",
-    body: JSON.stringify({ phone, otpCode }),
-  });
+  console.log("[API] Enviando verify OTP para teléfono:", phone);
+  console.log("[API] Código OTP:", otpCode);
+  try {
+    const response = await apiCall<VerifyOTPResponse>("/auth/verify-otp", {
+      method: "POST",
+      body: JSON.stringify({ phone, otpCode }),
+    });
+    console.log("[API] Respuesta verify OTP:", response);
+    return response;
+  } catch (error) {
+    console.error("[API] Error en verify OTP:", error);
+    throw error;
+  }
 }
 
 /**
@@ -100,7 +117,22 @@ export async function verifyDelegateOTP(
  * Store auth token in localStorage
  */
 export function saveAuthToken(token: string): void {
-  localStorage.setItem("authToken", token);
+  try {
+    console.log("[Auth] Intentando guardar token en localStorage");
+    console.log("[Auth] Token length:", token?.length);
+    console.log("[Auth] localStorage disponible:", typeof localStorage !== 'undefined');
+    
+    localStorage.setItem("authToken", token);
+    
+    // Verificar que se guardó correctamente
+    const saved = localStorage.getItem("authToken");
+    console.log("[Auth] Token guardado correctamente:", saved === token);
+    console.log("[Auth] Token recuperado length:", saved?.length);
+  } catch (error) {
+    console.error("[Auth] Error guardando token:", error);
+    console.error("[Auth] Error tipo:", error instanceof Error ? error.constructor.name : typeof error);
+    throw error;
+  }
 }
 
 /**
@@ -121,7 +153,24 @@ export function clearAuthToken(): void {
  * Store user data in localStorage
  */
 export function saveUserData(user: VerifyOTPResponse["user"] | DelegateVerifyOTPResponse["user"]): void {
-  localStorage.setItem("userData", JSON.stringify(user));
+  try {
+    console.log("[Auth] Intentando guardar userData en localStorage");
+    console.log("[Auth] User data:", user);
+    
+    const jsonString = JSON.stringify(user);
+    console.log("[Auth] JSON string length:", jsonString.length);
+    
+    localStorage.setItem("userData", jsonString);
+    
+    // Verificar que se guardó correctamente
+    const saved = localStorage.getItem("userData");
+    console.log("[Auth] userData guardado correctamente:", saved === jsonString);
+    console.log("[Auth] userData recuperado:", saved);
+  } catch (error) {
+    console.error("[Auth] Error guardando userData:", error);
+    console.error("[Auth] Error tipo:", error instanceof Error ? error.constructor.name : typeof error);
+    throw error;
+  }
 }
 
 /**
