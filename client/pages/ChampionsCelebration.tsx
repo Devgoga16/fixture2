@@ -41,10 +41,10 @@ export default function ChampionsCelebration() {
                     <div className="flex justify-center mb-6">
                         <Trophy className="text-yellow-400 w-24 h-24 animate-bounce" />
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 mb-4 drop-shadow-2xl">
+                    <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 mb-4 drop-shadow-2xl">
                         ¡FELICIDADES!
                     </h1>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                    <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
                         A Nuestros Campeones 2025
                     </h2>
                     <div className="flex justify-center gap-4">
@@ -109,7 +109,7 @@ export default function ChampionsCelebration() {
                                     Campeones
                                 </div>
                                 <img
-                                    src="/images/voleycampeones.jpg"
+                                    src="/images/voleycampeon2.jpg"
                                     alt="Campeones de Vóley"
                                     className="w-full h-96 object-cover"
                                 />
