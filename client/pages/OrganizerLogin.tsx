@@ -57,38 +57,25 @@ export default function OrganizerLogin() {
       return;
     }
 
+    setIsSendingCode(true);
+    
     try {
-      setDebugError("STEP 1: Iniciando solicitud de código...");
-      setIsSendingCode(true);
-      
-      setDebugError("STEP 2: Llamando requestOTP...");
-      console.log("[OTP Request] Solicitando código para:", phoneNumber);
-      
-      const response = await requestOTP(phoneNumber);
-      
-      setDebugError("STEP 3: Respuesta recibida correctamente");
-      console.log("[OTP Request] Respuesta recibida:", response);
 
+      const response = await requestOTP(phoneNumber);
+      alert('OTP Response: ' + JSON.stringify(response));
       toast({
         title: "Código enviado",
         description: response.message || `Código enviado al +51 ${phoneNumber} por WhatsApp`,
       });
 
-      setDebugError("STEP 4: Actualizando estado...");
       setCodeSent(true);
-      
-      setDebugError(""); // Limpiar si todo salió bien
-      console.log("[OTP Request] Estado actualizado: codeSent = true");
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : "No stack";
       const errorName = error instanceof Error ? error.name : typeof error;
       const fullError = `REQUEST ERROR:\nType: ${errorName}\nMessage: ${errorMsg}\n\nStack:\n${errorStack}`;
       
-      console.error("[OTP Request] Error completo:", error);
-      console.error("[OTP Request] Error type:", errorName);
-      console.error("[OTP Request] Error constructor:", error?.constructor?.name);
-      
+      console.error("[OTP Request] Error:", error);
       setDebugError(fullError);
       
       toast({
@@ -98,7 +85,6 @@ export default function OrganizerLogin() {
       });
     } finally {
       setIsSendingCode(false);
-      console.log("[OTP Request] Proceso finalizado");
     }
   };
 
@@ -117,34 +103,25 @@ export default function OrganizerLogin() {
     try {
       setIsVerifying(true);
       setDebugError("");
-      console.log("[OTP Verify] Verificando código:", code.length, "dígitos");
-      console.log("[OTP Verify] Teléfono:", phoneNumber);
       
       const response = await verifyOTP(phoneNumber, code);
-      console.log("[OTP Verify] Respuesta recibida:", response);
 
       // Guardar token y datos del usuario
-      console.log("[OTP Verify] Guardando token...");
       saveAuthToken(response.token);
-      console.log("[OTP Verify] Token guardado");
-      
-      console.log("[OTP Verify] Guardando datos de usuario...");
       saveUserData(response.user);
-      console.log("[OTP Verify] Datos de usuario guardados:", response.user);
 
       toast({
         title: "Inicio de sesión exitoso",
         description: `Bienvenido, ${response.user.name}`,
       });
 
-      console.log("[OTP Verify] Navegando a dashboard...");
       navigate("/organizer-dashboard");
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : "No stack";
       const fullError = `VERIFY ERROR:\n${errorMsg}\n\nStack: ${errorStack}`;
       
-      console.error("[OTP Verify] Error completo:", error);
+      console.error("[OTP Verify] Error:", error);
       setDebugError(fullError);
       
       toast({
@@ -154,7 +131,6 @@ export default function OrganizerLogin() {
       });
     } finally {
       setIsVerifying(false);
-      console.log("[OTP Verify] Proceso finalizado");
     }
   };
 

@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ChampionsCelebration from "./pages/ChampionsCelebration";
 import Index from "./pages/Index";
 import TournamentView from "./pages/TournamentView";
 import { TeamPlayers } from "./pages/TeamPlayers";
@@ -26,7 +27,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<ChampionsCelebration />} />
+          <Route path="/old" element={<Index />} />
           <Route path="/new" element={<TournamentView />} />
           <Route path="/tournament/:id" element={<TournamentView />} />
           <Route path="/tournament/:tournamentId/match/:matchId" element={<ManageMatch />} />
